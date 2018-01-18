@@ -7,7 +7,7 @@ type (
 		Execute()
 		Write() []interface{}
 		Dispatch() []interface{}
-		Continue() Procedure
+		Chain() Procedure
 	}
 	Reader interface {
 		Read(...interface{})

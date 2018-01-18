@@ -29,5 +29,5 @@ func (this Handler) handle(procedure Procedure) {
 	this.writer.Write(procedure.Write()...)
 	this.dispatcher.Dispatch(procedure.Dispatch()...)
 
-	this.handle(procedure.Continue())
+	this.handle(procedure.Chain())
 }

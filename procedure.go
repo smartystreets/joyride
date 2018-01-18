@@ -33,4 +33,4 @@ func (this *BaseProcedure) Read() []interface{}     { return this.Reads }
 func (this *BaseProcedure) Execute()                { /* noop */ }
 func (this *BaseProcedure) Write() []interface{}    { return this.Writes }
 func (this *BaseProcedure) Dispatch() []interface{} { return this.Messages }
-func (this *BaseProcedure) Continue() Procedure     { return this.Next }
+func (this *BaseProcedure) Chain() Procedure        { return this.Next }
