@@ -20,7 +20,13 @@ func WithMessages(messages ...interface{}) Option {
 }
 
 func NewProcedure(options ...Option) *BaseProcedure {
-	return nil
+	procedure := &BaseProcedure{}
+
+	for _, option := range options {
+		option(procedure)
+	}
+
+	return procedure
 }
 
 func (this *BaseProcedure) Read() []interface{}     { return this.Reads }
