@@ -1,18 +1,18 @@
 package joyride
 
 type Runner struct {
-	factory    Factory
-	reader     Reader
-	writer     Writer
-	dispatcher Dispatcher
+	factory   Factory
+	reader    Reader
+	writer    Writer
+	publisher Publisher
 }
 
-func New(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
+func NewRunner(factory Factory, reader Reader, writer Writer, publisher Publisher) Runner {
 	return Runner{
-		factory:    factory,
-		reader:     reader,
-		writer:     writer,
-		dispatcher: dispatcher,
+		factory:   factory,
+		reader:    reader,
+		writer:    writer,
+		publisher: publisher,
 	}
 }
 
@@ -30,11 +30,12 @@ func (this Runner) run(procedure Procedure) {
 	}
 
 	this.process(procedure)
-	this.run(procedure.Next())
+	this.run(procedure.Procedure())
 }
+
 func (this Runner) process(procedure Procedure) {
-	this.reader.Read(procedure.Reads()...)
-	procedure.Execute()
-	this.writer.Write(procedure.Writes()...)
-	this.dispatcher.Dispatch(procedure.Messages()...)
+	this.reader.Read(procedure.Populate()...)
+	procedure.Process()
+	this.writer.Write(procedure.Persist()...)
+	this.publisher.Publish(procedure.Publish()...)
 }
