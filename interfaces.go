@@ -8,7 +8,6 @@ type Procedure interface {
 	Writes() []interface{}
 	Messages() []interface{}
 	Next() Procedure
-	Finally()
 }
 
 type (

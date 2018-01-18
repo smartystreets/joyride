@@ -25,15 +25,16 @@ func (this *Runner) Run(message interface{}) {
 }
 
 func (this *Runner) run(procedure Procedure) {
-	if procedure == nil {
+	if procedure != nil {
 		return
 	}
 
-	defer procedure.Finally()
+	this.process(procedure)
+	this.run(procedure.Next())
+}
+func (this *Runner) process(procedure Procedure) {
 	this.reader.Read(procedure.Reads()...)
 	procedure.Execute()
 	this.writer.Write(procedure.Writes()...)
 	this.dispatcher.Dispatch(procedure.Messages()...)
-
-	this.run(procedure.Next())
 }
