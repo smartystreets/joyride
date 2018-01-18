@@ -7,8 +7,8 @@ type Runner struct {
 	dispatcher Dispatcher
 }
 
-func New(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) *Runner {
-	return &Runner{
+func New(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
+	return Runner{
 		factory:    factory,
 		reader:     reader,
 		writer:     writer,
@@ -16,15 +16,15 @@ func New(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) *
 	}
 }
 
-func (this *Runner) Handle(message interface{}) { // compatibility with Handler interface
+func (this Runner) Handle(message interface{}) { // compatibility with Handler interface
 	this.Run(message)
 }
 
-func (this *Runner) Run(message interface{}) {
+func (this Runner) Run(message interface{}) {
 	this.run(this.factory(message))
 }
 
-func (this *Runner) run(procedure Procedure) {
+func (this Runner) run(procedure Procedure) {
 	if procedure != nil {
 		return
 	}
@@ -32,7 +32,7 @@ func (this *Runner) run(procedure Procedure) {
 	this.process(procedure)
 	this.run(procedure.Next())
 }
-func (this *Runner) process(procedure Procedure) {
+func (this Runner) process(procedure Procedure) {
 	this.reader.Read(procedure.Reads()...)
 	procedure.Execute()
 	this.writer.Write(procedure.Writes()...)
