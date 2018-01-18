@@ -3,11 +3,11 @@ package joyride
 type Factory func(interface{}) Procedure
 
 type Procedure interface {
-	Populate() []interface{}
-	Process()
-	Persist() []interface{}
-	Publish() []interface{}
-	Procedure() Procedure
+	Read() []interface{}
+	Execute()
+	Write() []interface{}
+	Dispatch() []interface{}
+	Continue() Procedure
 }
 
 type (
@@ -17,7 +17,7 @@ type (
 	Writer interface {
 		Write(...interface{})
 	}
-	Publisher interface {
-		Publish(...interface{})
+	Dispatcher interface {
+		Dispatch(...interface{})
 	}
 )
