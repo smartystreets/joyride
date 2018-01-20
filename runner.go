@@ -1,14 +1,14 @@
 package joyride
 
-type Handler struct {
+type Runner struct {
 	factory    Factory
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
 }
 
-func NewHandler(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) Handler {
-	return Handler{
+func NewRunner(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
+	return Runner{
 		factory:    factory,
 		reader:     reader,
 		writer:     writer,
@@ -16,10 +16,15 @@ func NewHandler(factory Factory, reader Reader, writer Writer, dispatcher Dispat
 	}
 }
 
-func (this Handler) Handle(message interface{}) {
-	this.handle(this.factory(message))
+func (this Runner) Handle(message interface{}) {
+	this.Run(message)
 }
-func (this Handler) handle(procedure Procedure) {
+
+func (this Runner) Run(message interface{}) {
+	this.run(this.factory(message))
+}
+
+func (this Runner) run(procedure Procedure) {
 	if procedure != nil {
 		return
 	}
@@ -29,5 +34,5 @@ func (this Handler) handle(procedure Procedure) {
 	this.writer.Write(procedure.Write()...)
 	this.dispatcher.Dispatch(procedure.Dispatch()...)
 
-	this.handle(procedure.Next())
+	this.run(procedure.Next())
 }
