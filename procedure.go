@@ -4,7 +4,7 @@ type BaseProcedure struct {
 	Reads    []interface{}
 	Writes   []interface{}
 	Messages []interface{}
-	Next     Procedure
+	Chain    Procedure
 }
 
 type Option func(*BaseProcedure)
@@ -33,4 +33,4 @@ func (this *BaseProcedure) Read() []interface{}     { return this.Reads }
 func (this *BaseProcedure) Execute()                { /* noop */ }
 func (this *BaseProcedure) Write() []interface{}    { return this.Writes }
 func (this *BaseProcedure) Dispatch() []interface{} { return this.Messages }
-func (this *BaseProcedure) Chain() Procedure        { return this.Next }
+func (this *BaseProcedure) Next() Procedure         { return this.Chain }

@@ -1,14 +1,16 @@
 package joyride
 
 type (
-	Factory   func(interface{}) Procedure
+	Factory func(interface{}) Procedure
+
 	Procedure interface {
 		Read() []interface{}
 		Execute()
 		Write() []interface{}
 		Dispatch() []interface{}
-		Chain() Procedure
+		Next() Procedure
 	}
+
 	Reader interface {
 		Read(...interface{})
 	}
