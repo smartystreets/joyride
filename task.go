@@ -1,46 +1,43 @@
 package joyride
 
-type Task struct {
-	Reads    []interface{}
-	Writes   []interface{}
-	Messages []interface{}
-	NextTask Procedure
-}
+type (
+	ExecutableTask interface {
+		Reads() []interface{}
+		Execute()
+		Writes() []interface{}
+		Messages() []interface{}
+		Next() ExecutableTask
+	}
+	Task struct {
+		reads    []interface{}
+		writes   []interface{}
+		messages []interface{}
+		next     ExecutableTask
+	}
+	Option func(*Task)
+)
 
-type TaskOption func(*Task)
+func Read(items ...interface{}) Option     { return func(this *Task) { this.Read(items...) } }
+func Write(items ...interface{}) Option    { return func(this *Task) { this.Write(items...) } }
+func Dispatch(items ...interface{}) Option { return func(this *Task) { this.Dispatch(items...) } }
 
-func WithReads(reads ...interface{}) TaskOption {
-	return func(this *Task) { this.Reads = append(this.Reads, reads...) }
-}
-func WithWrites(writes ...interface{}) TaskOption {
-	return func(this *Task) { this.Writes = append(this.Writes, writes...) }
-}
-func WithMessages(messages ...interface{}) TaskOption {
-	return func(this *Task) { this.Messages = append(this.Messages, messages...) }
-}
-
-func New(options ...TaskOption) *Task {
-	procedure := &Task{}
+func New(options ...Option) *Task {
+	this := &Task{}
 
 	for _, option := range options {
-		option(procedure)
+		option(this)
 	}
 
-	return procedure
+	return this
 }
 
-func (this *Task) Read() []interface{}     { return this.Reads }
-func (this *Task) Execute()                { /* noop */ }
-func (this *Task) Write() []interface{}    { return this.Writes }
-func (this *Task) Dispatch() []interface{} { return this.Messages }
-func (this *Task) Next() Procedure         { return this.NextTask }
+func (this *Task) Reads() []interface{}    { return this.reads }
+func (this *Task) Execute()                {}
+func (this *Task) Writes() []interface{}   { return this.writes }
+func (this *Task) Messages() []interface{} { return this.messages }
+func (this *Task) Next() ExecutableTask    { return this.next }
 
-func (this *Task) AppendReads(reads ...interface{}) {
-	this.Reads = append(this.Reads, reads...)
-}
-func (this *Task) AppendWrites(writes ...interface{}) {
-	this.Writes = append(this.Writes, writes...)
-}
-func (this *Task) AppendMessages(messages ...interface{}) {
-	this.Messages = append(this.Messages, messages...)
-}
+func (this *Task) Read(items ...interface{})     { this.reads = append(this.reads, items...) }
+func (this *Task) Write(items ...interface{})    { this.writes = append(this.writes, items...) }
+func (this *Task) Dispatch(items ...interface{}) { this.messages = append(this.messages, items...) }
+func (this *Task) Chain(item ExecutableTask)     { this.next = item }

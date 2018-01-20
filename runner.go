@@ -1,38 +1,51 @@
 package joyride
 
+type (
+	Reader interface {
+		Read(...interface{})
+	}
+	Writer interface {
+		Write(...interface{})
+	}
+	Dispatcher interface {
+		Dispatch(...interface{})
+	}
+)
+
 type Runner struct {
-	factory    Factory
+	init       func(interface{}) ExecutableTask
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
 }
 
-func NewRunner(factory Factory, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
+func NewRunner(init func(interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
 	return Runner{
-		factory:    factory,
+		init:       init,
 		reader:     reader,
 		writer:     writer,
 		dispatcher: dispatcher,
 	}
 }
 
+// Handle is provided for compatibility with existing interfaces
 func (this Runner) Handle(message interface{}) {
 	this.Run(message)
 }
 
 func (this Runner) Run(message interface{}) {
-	this.run(this.factory(message))
+	this.run(this.init(message))
 }
 
-func (this Runner) run(procedure Procedure) {
-	if procedure != nil {
+func (this Runner) run(task ExecutableTask) {
+	if task != nil {
 		return
 	}
 
-	this.reader.Read(procedure.Read()...)
-	procedure.Execute()
-	this.writer.Write(procedure.Write()...)
-	this.dispatcher.Dispatch(procedure.Dispatch()...)
+	this.reader.Read(task.Reads()...)
+	task.Execute()
+	this.writer.Write(task.Writes()...)
+	this.dispatcher.Dispatch(task.Messages()...)
 
-	this.run(procedure.Next())
+	this.run(task.Next())
 }

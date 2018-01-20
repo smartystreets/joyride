@@ -1,11 +1,11 @@
 package joyride
 
 type MultiTask struct {
-	tasks []Procedure
+	tasks []ExecutableTask
 }
 
-func NewMultiTask(tasks ...Procedure) *MultiTask {
-	var filtered []Procedure
+func NewMultiTask(tasks ...ExecutableTask) *MultiTask {
+	var filtered []ExecutableTask
 
 	for _, task := range tasks {
 		if task != nil {
@@ -16,9 +16,9 @@ func NewMultiTask(tasks ...Procedure) *MultiTask {
 	return &MultiTask{tasks: filtered}
 }
 
-func (this *MultiTask) Read() (reads []interface{}) {
+func (this *MultiTask) Reads() (reads []interface{}) {
 	for _, task := range this.tasks {
-		reads = append(reads, task.Read())
+		reads = append(reads, task.Reads()...)
 	}
 	return reads
 }
@@ -29,23 +29,23 @@ func (this *MultiTask) Execute() {
 	}
 }
 
-func (this *MultiTask) Write() (writes []interface{}) {
+func (this *MultiTask) Writes() (writes []interface{}) {
 	for _, task := range this.tasks {
-		writes = append(writes, task.Write())
+		writes = append(writes, task.Writes()...)
 	}
 	return writes
 }
 
-func (this *MultiTask) Dispatch() (messages []interface{}) {
+func (this *MultiTask) Messages() (messages []interface{}) {
 	for _, task := range this.tasks {
-		messages = append(messages, task.Dispatch())
+		messages = append(messages, task.Messages()...)
 	}
 	return messages
 
 }
 
-func (this *MultiTask) Next() Procedure {
-	var tasks []Procedure
+func (this *MultiTask) Next() ExecutableTask {
+	var tasks []ExecutableTask
 	for _, task := range this.tasks {
 		tasks = append(tasks, task.Next())
 	}
