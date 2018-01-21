@@ -53,6 +53,7 @@ func (this *RunnerFixture) TestNextTask() {
 	this.runner.Run("message")
 
 	this.So(next.executed, should.NotEqual, time.Time{})
+	this.So(next.Times(), should.BeChronological)
 }
 
 /////////////////////////////////////////////////////////////

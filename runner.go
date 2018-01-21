@@ -28,11 +28,6 @@ func NewRunner(init func(interface{}) ExecutableTask, reader Reader, writer Writ
 	}
 }
 
-//// Handle is provided for compatibility with existing interfaces
-//func (this Runner) Handle(message interface{}) {
-//	this.Run(message)
-//}
-
 func (this Runner) Run(message interface{}) {
 	this.run(this.init(message))
 }
