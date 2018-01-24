@@ -31,7 +31,6 @@ func NewRunner(init func(...interface{}) ExecutableTask, reader Reader, writer W
 func (this Runner) Run(messages ...interface{}) {
 	this.run(this.init(messages...))
 }
-
 func (this Runner) run(task ExecutableTask) {
 	if task == nil {
 		return
