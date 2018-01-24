@@ -41,6 +41,18 @@ func (this *TaskFixture) TestNextStateMaintained() {
 	this.So(this.task.Next(), should.Equal, next)
 }
 
+func (this *TaskFixture) TestExecuteNoOperation() {
+	this.task.Read(this.messages...)
+	this.task.Execute() // no op
+	this.task.Write(this.messages...)
+	this.task.Dispatch(this.messages...)
+
+	this.So(this.task.Reads(), should.Resemble, this.messages)
+	this.So(this.task.Writes(), should.Resemble, this.messages)
+	this.So(this.task.Messages(), should.Resemble, this.messages)
+}
+
+
 func (this *TaskFixture) TestNew() {
 	reads := []interface{}{1, 2, 3}
 	writes := []interface{}{4, 5, 6}
