@@ -40,4 +40,4 @@ func (this *Task) Next() ExecutableTask    { return this.next }
 func (this *Task) Read(items ...interface{})     { this.reads = append(this.reads, items...) }
 func (this *Task) Write(items ...interface{})    { this.writes = append(this.writes, items...) }
 func (this *Task) Dispatch(items ...interface{}) { this.messages = append(this.messages, items...) }
-func (this *Task) Chain(item ExecutableTask)     { this.next = item }
+func (this *Task) Chain(next ExecutableTask)     { this.next = next }
