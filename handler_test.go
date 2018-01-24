@@ -23,14 +23,22 @@ type HandlerFixture struct {
 func (this *HandlerFixture) Setup() {
 	this.task = NewFakeTask()
 	this.io = &ExternalIO{}
-	this.handler = NewHandler(this.task.Initialize, this.io, this.io, this.io)
+	this.handler = NewHandler(this, this.io, this.io, this.io)
+}
+func (this *HandlerFixture) Build(messages ...interface{}) ExecutableTask {
+	if this.task != nil {
+		this.task.Initialize(messages...)
+	}
+
+	if this.task == nil {
+		return nil
+	}
+
+	return this.task
 }
 
 func (this *HandlerFixture) TestSkipNilTasks() {
-	this.handler = NewHandler(func(...interface{}) ExecutableTask {
-		return nil
-	}, this.io, this.io, this.io)
-
+	this.task = nil
 	this.So(func() { this.handler.Handle(0) }, should.NotPanic)
 }
 

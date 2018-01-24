@@ -10,16 +10,19 @@ type (
 	Dispatcher interface {
 		Dispatch(...interface{})
 	}
+	Builder interface {
+		Build(...interface{}) ExecutableTask
+	}
 )
 
 type Handler struct {
-	builder    func(...interface{}) ExecutableTask
+	builder    Builder
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
 }
 
-func NewHandler(builder func(...interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Handler {
+func NewHandler(builder Builder, reader Reader, writer Writer, dispatcher Dispatcher) Handler {
 	return Handler{
 		builder:    builder,
 		reader:     reader,
@@ -29,7 +32,7 @@ func NewHandler(builder func(...interface{}) ExecutableTask, reader Reader, writ
 }
 
 func (this Handler) Handle(messages ...interface{}) {
-	this.run(this.builder(messages...))
+	this.run(this.builder.Build(messages...))
 }
 func (this Handler) run(task ExecutableTask) {
 	if task == nil {
