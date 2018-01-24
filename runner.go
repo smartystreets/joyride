@@ -13,13 +13,13 @@ type (
 )
 
 type Runner struct {
-	init       func(interface{}) ExecutableTask
+	init       func(...interface{}) ExecutableTask
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
 }
 
-func NewRunner(init func(interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
+func NewRunner(init func(...interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
 	return Runner{
 		init:       init,
 		reader:     reader,
@@ -28,8 +28,8 @@ func NewRunner(init func(interface{}) ExecutableTask, reader Reader, writer Writ
 	}
 }
 
-func (this Runner) Run(message interface{}) {
-	this.run(this.init(message))
+func (this Runner) Run(messages ...interface{}) {
+	this.run(this.init(messages...))
 }
 
 func (this Runner) run(task ExecutableTask) {

@@ -27,7 +27,7 @@ func (this *RunnerFixture) Setup() {
 }
 
 func (this *RunnerFixture) TestSkipNilTasks() {
-	this.runner = NewRunner(func(interface{}) ExecutableTask {
+	this.runner = NewRunner(func(...interface{}) ExecutableTask {
 		return nil
 	}, this.io, this.io, this.io)
 
@@ -35,11 +35,12 @@ func (this *RunnerFixture) TestSkipNilTasks() {
 }
 
 func (this *RunnerFixture) TestRunner() {
-	const message = "Hello, World!"
+	const message1 = "Hello, World!"
+	const message2 = 42
 
-	this.runner.Run(message)
+	this.runner.Run(message1, message2)
 
-	this.So(this.task.initialMessage, should.Equal, message)
+	this.So(this.task.initializedMessages, should.Resemble, []interface{}{message1, message2})
 	this.So(this.io.reads, should.Resemble, this.task.reads)
 	this.So(this.io.writes, should.Resemble, this.task.writes)
 	this.So(this.io.messages, should.Resemble, this.task.messages)
@@ -59,7 +60,7 @@ func (this *RunnerFixture) TestNextTask() {
 /////////////////////////////////////////////////////////////
 
 type FakeTask struct {
-	initialMessage                                             interface{}
+	initializedMessages                                        []interface{}
 	reads, writes, messages                                    []interface{}
 	initialized, read, executed, written, dispatched, nextTime time.Time
 	next                                                       *FakeTask
@@ -77,8 +78,8 @@ func (this *FakeTask) Times() []time.Time {
 	return []time.Time{this.initialized, this.read, this.executed, this.written, this.dispatched, this.nextTime}
 }
 
-func (this *FakeTask) Initialize(message interface{}) ExecutableTask {
-	this.initialMessage = message
+func (this *FakeTask) Initialize(messages ...interface{}) ExecutableTask {
+	this.initializedMessages = messages
 	this.initialized = clock.UTCNow()
 	return this
 }
