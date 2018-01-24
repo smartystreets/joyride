@@ -13,7 +13,7 @@ type (
 )
 
 type Runner struct {
-	init       func(...interface{}) ExecutableTask
+	builder    Builder
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
@@ -21,7 +21,7 @@ type Runner struct {
 
 func NewRunner(init func(...interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
 	return Runner{
-		init:       init,
+		builder:    BatchBuilder{callback: init},
 		reader:     reader,
 		writer:     writer,
 		dispatcher: dispatcher,
@@ -29,7 +29,8 @@ func NewRunner(init func(...interface{}) ExecutableTask, reader Reader, writer W
 }
 
 func (this Runner) Run(messages ...interface{}) {
-	this.run(this.init(messages...))
+	task := this.builder.Build(messages...)
+	this.run(task)
 }
 func (this Runner) run(task ExecutableTask) {
 	if task == nil {
@@ -47,4 +48,19 @@ func (this Runner) run(task ExecutableTask) {
 // compatibility with Handler interface
 func (this Runner) Handle(messages ...interface{}) {
 	this.Run(messages...)
+}
+
+/////////////////////////////////////////////////////////////////
+
+type (
+	Builder interface {
+		Build(...interface{}) ExecutableTask
+	}
+	BatchBuilder struct {
+		callback func(...interface{}) ExecutableTask
+	}
+)
+
+func (this BatchBuilder) Build(messages ...interface{}) ExecutableTask {
+	return this.callback(messages...)
 }
