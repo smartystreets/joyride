@@ -52,8 +52,7 @@ func (this *TaskFixture) TestExecuteNoOperation() {
 	this.So(this.task.Messages(), should.Resemble, this.messages)
 }
 
-
-func (this *TaskFixture) TestNew() {
+func (this *TaskFixture) TestFunctionalOptions() {
 	reads := []interface{}{1, 2, 3}
 	writes := []interface{}{4, 5, 6}
 	messages := []interface{}{7, 8, 9}
