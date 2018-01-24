@@ -9,36 +9,36 @@ import (
 	"github.com/smartystreets/gunit"
 )
 
-func TestRunnerFixture(t *testing.T) {
-	gunit.Run(new(RunnerFixture), t)
+func TestHandlerFixture(t *testing.T) {
+	gunit.Run(new(HandlerFixture), t)
 }
 
-type RunnerFixture struct {
+type HandlerFixture struct {
 	*gunit.Fixture
-	task   *FakeTask
-	io     *ExternalIO
-	runner Runner
+	task    *FakeTask
+	io      *ExternalIO
+	handler Handler
 }
 
-func (this *RunnerFixture) Setup() {
+func (this *HandlerFixture) Setup() {
 	this.task = NewFakeTask()
 	this.io = &ExternalIO{}
-	this.runner = NewRunner(this.task.Initialize, this.io, this.io, this.io)
+	this.handler = NewHandler(this.task.Initialize, this.io, this.io, this.io)
 }
 
-func (this *RunnerFixture) TestSkipNilTasks() {
-	this.runner = NewRunner(func(...interface{}) ExecutableTask {
+func (this *HandlerFixture) TestSkipNilTasks() {
+	this.handler = NewHandler(func(...interface{}) ExecutableTask {
 		return nil
 	}, this.io, this.io, this.io)
 
-	this.So(func() { this.runner.Run(0) }, should.NotPanic)
+	this.So(func() { this.handler.Handle(0) }, should.NotPanic)
 }
 
-func (this *RunnerFixture) TestRunner() {
+func (this *HandlerFixture) TestHandler() {
 	const message1 = "Hello, World!"
 	const message2 = 42
 
-	this.runner.Run(message1, message2)
+	this.handler.Handle(message1, message2)
 
 	this.So(this.task.initializedMessages, should.Resemble, []interface{}{message1, message2})
 	this.So(this.io.reads, should.Resemble, this.task.reads)
@@ -47,11 +47,11 @@ func (this *RunnerFixture) TestRunner() {
 	this.So(this.task.Times(), should.BeChronological)
 }
 
-func (this *RunnerFixture) TestNextTask() {
+func (this *HandlerFixture) TestNextTask() {
 	next := &FakeTask{}
 	this.task.next = next
 
-	this.runner.Run("message")
+	this.handler.Handle("message")
 
 	this.So(next.executed, should.NotEqual, time.Time{})
 	this.So(next.Times(), should.BeChronological)

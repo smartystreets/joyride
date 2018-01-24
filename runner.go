@@ -12,15 +12,15 @@ type (
 	}
 )
 
-type Runner struct {
+type Handler struct {
 	builder    func(...interface{}) ExecutableTask
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
 }
 
-func NewRunner(builder func(...interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Runner {
-	return Runner{
+func NewHandler(builder func(...interface{}) ExecutableTask, reader Reader, writer Writer, dispatcher Dispatcher) Handler {
+	return Handler{
 		builder:    builder,
 		reader:     reader,
 		writer:     writer,
@@ -28,10 +28,10 @@ func NewRunner(builder func(...interface{}) ExecutableTask, reader Reader, write
 	}
 }
 
-func (this Runner) Run(messages ...interface{}) {
+func (this Handler) Handle(messages ...interface{}) {
 	this.run(this.builder(messages...))
 }
-func (this Runner) run(task ExecutableTask) {
+func (this Handler) run(task ExecutableTask) {
 	if task == nil {
 		return
 	}
