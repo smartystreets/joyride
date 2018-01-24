@@ -44,3 +44,8 @@ func (this Runner) run(task ExecutableTask) {
 
 	this.run(task.Next())
 }
+
+// compatibility with Handler interface
+func (this Runner) Handle(messages ...interface{}) {
+	this.Run(messages...)
+}

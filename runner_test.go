@@ -31,14 +31,14 @@ func (this *RunnerFixture) TestSkipNilTasks() {
 		return nil
 	}, this.io, this.io, this.io)
 
-	this.So(func() { this.runner.Run(0) }, should.NotPanic)
+	this.So(func() { this.runner.Handle(0) }, should.NotPanic)
 }
 
 func (this *RunnerFixture) TestRunner() {
 	const message1 = "Hello, World!"
 	const message2 = 42
 
-	this.runner.Run(message1, message2)
+	this.runner.Handle(message1, message2)
 
 	this.So(this.task.initializedMessages, should.Resemble, []interface{}{message1, message2})
 	this.So(this.io.reads, should.Resemble, this.task.reads)
@@ -51,7 +51,7 @@ func (this *RunnerFixture) TestNextTask() {
 	next := &FakeTask{}
 	this.task.next = next
 
-	this.runner.Run("message")
+	this.runner.Handle("message")
 
 	this.So(next.executed, should.NotEqual, time.Time{})
 	this.So(next.Times(), should.BeChronological)
