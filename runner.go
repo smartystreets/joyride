@@ -29,8 +29,7 @@ func NewRunner(builder func(...interface{}) ExecutableTask, reader Reader, write
 }
 
 func (this Runner) Run(messages ...interface{}) {
-	task := this.builder(messages...)
-	this.run(task)
+	this.run(this.builder(messages...))
 }
 func (this Runner) run(task ExecutableTask) {
 	if task == nil {
@@ -43,9 +42,4 @@ func (this Runner) run(task ExecutableTask) {
 	this.dispatcher.Dispatch(task.Messages()...)
 
 	this.run(task.Next())
-}
-
-// compatibility with Handler interface
-func (this Runner) Handle(messages ...interface{}) {
-	this.Run(messages...)
 }
