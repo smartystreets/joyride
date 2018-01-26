@@ -19,7 +19,7 @@ type TaskFixture struct {
 }
 
 func (this *TaskFixture) Setup() {
-	this.task = New()
+	this.task = NewTask()
 	this.messages = []interface{}{1, 2, 3}
 }
 
@@ -36,7 +36,7 @@ func (this *TaskFixture) TestMessageStateMaintained() {
 	this.So(this.task.Messages(), should.Resemble, this.messages)
 }
 func (this *TaskFixture) TestNextStateMaintained() {
-	next := New()
+	next := NewTask()
 	this.task.Chain(next)
 	this.So(this.task.Next(), should.Equal, next)
 }
@@ -57,7 +57,7 @@ func (this *TaskFixture) TestFunctionalOptions() {
 	writes := []interface{}{4, 5, 6}
 	messages := []interface{}{7, 8, 9}
 
-	task := New(Read(reads...), Write(writes...), Dispatch(messages...))
+	task := NewTask(Read(reads...), Write(writes...), Dispatch(messages...))
 
 	this.So(task.Reads(), should.Resemble, reads)
 	this.So(task.Writes(), should.Resemble, writes)

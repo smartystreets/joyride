@@ -9,23 +9,23 @@ import (
 	"github.com/smartystreets/gunit"
 )
 
-func TestHandlerFixture(t *testing.T) {
-	gunit.Run(new(HandlerFixture), t)
+func TestRunnerFixture(t *testing.T) {
+	gunit.Run(new(RunnerFixture), t)
 }
 
-type HandlerFixture struct {
+type RunnerFixture struct {
 	*gunit.Fixture
-	task    *FakeTask
-	io      *ExternalIO
-	handler Handler
+	task   *FakeTask
+	io     *ExternalIO
+	runner Runner
 }
 
-func (this *HandlerFixture) Setup() {
+func (this *RunnerFixture) Setup() {
 	this.task = NewFakeTask()
 	this.io = &ExternalIO{}
-	this.handler = NewHandler(this, this.io, this.io, this.io)
+	this.runner = NewRunner(this.io, this.io, this.io)
 }
-func (this *HandlerFixture) Build(messages ...interface{}) ExecutableTask {
+func (this *RunnerFixture) Build(messages ...interface{}) RunnableTask {
 	if this.task != nil {
 		this.task.Initialize(messages...)
 	}
@@ -37,16 +37,17 @@ func (this *HandlerFixture) Build(messages ...interface{}) ExecutableTask {
 	return this.task
 }
 
-func (this *HandlerFixture) TestSkipNilTasks() {
+func (this *RunnerFixture) TestSkipNilTasks() {
 	this.task = nil
-	this.So(func() { this.handler.Handle(0) }, should.NotPanic)
+	this.So(func() { this.runner.Run(nil) }, should.NotPanic)
 }
 
-func (this *HandlerFixture) TestHandler() {
+func (this *RunnerFixture) TestHandler() {
 	const message1 = "Hello, World!"
 	const message2 = 42
+	this.task.Initialize(message1, message2)
 
-	this.handler.Handle(message1, message2)
+	this.runner.Run(this.task)
 
 	this.So(this.task.initializedMessages, should.Resemble, []interface{}{message1, message2})
 	this.So(this.io.reads, should.Resemble, this.task.reads)
@@ -55,11 +56,11 @@ func (this *HandlerFixture) TestHandler() {
 	this.So(this.task.Times(), should.BeChronological)
 }
 
-func (this *HandlerFixture) TestNextTask() {
+func (this *RunnerFixture) TestNextTask() {
 	next := &FakeTask{}
 	this.task.next = next
 
-	this.handler.Handle("message")
+	this.runner.Run(this.task)
 
 	this.So(next.executed, should.NotEqual, time.Time{})
 	this.So(next.Times(), should.BeChronological)
@@ -86,7 +87,7 @@ func (this *FakeTask) Times() []time.Time {
 	return []time.Time{this.initialized, this.read, this.executed, this.written, this.dispatched, this.nextTime}
 }
 
-func (this *FakeTask) Initialize(messages ...interface{}) ExecutableTask {
+func (this *FakeTask) Initialize(messages ...interface{}) RunnableTask {
 	this.initializedMessages = messages
 	this.initialized = clock.UTCNow()
 	return this
@@ -106,7 +107,7 @@ func (this *FakeTask) Messages() []interface{} {
 	this.dispatched = clock.UTCNow()
 	return this.messages
 }
-func (this *FakeTask) Next() ExecutableTask {
+func (this *FakeTask) Next() RunnableTask {
 	this.nextTime = clock.UTCNow()
 	if this.next == nil {
 		return nil // Go nil conversion quirks
