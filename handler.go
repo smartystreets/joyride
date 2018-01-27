@@ -7,7 +7,7 @@ import (
 
 type MessageHandler interface {
 	Handle(...interface{})
-	Apply(interface{}) bool
+	HandleMessage(interface{}) bool
 	Run()
 }
 
@@ -23,7 +23,7 @@ func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...RunnableTask) 
 
 func (this *Handler) Handle(messages ...interface{}) {
 	for _, message := range messages {
-		if !this.inner.Apply(message) {
+		if !this.inner.HandleMessage(message) {
 			log.Panicf("[WARN] Handler of type [%s] unable to handle message of type [%s].",
 				reflect.TypeOf(this.inner), reflect.TypeOf(message))
 		}
