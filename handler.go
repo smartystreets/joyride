@@ -32,10 +32,6 @@ func (this *Handler) Handle(messages ...interface{}) {
 	this.inner.Run()
 }
 
-func (this *Handler) Apply(_ interface{}) bool {
-	return false
-}
-
 func (this *Handler) Add(task RunnableTask) {
 	this.tasks = append(this.tasks, task)
 }
