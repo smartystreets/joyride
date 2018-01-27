@@ -16,7 +16,6 @@ type (
 )
 
 type Runner struct {
-	task       RunnableTask
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
