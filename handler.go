@@ -12,12 +12,12 @@ type MessageHandler interface {
 }
 
 type Handler struct {
-	runner Runner
+	runner TaskRunner
 	inner  MessageHandler
-	tasks  []Task
+	tasks  []RunnableTask
 }
 
-func NewHandler(inner MessageHandler, runner Runner, tasks ...Task) *Handler {
+func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...RunnableTask) *Handler {
 	return &Handler{inner: inner, runner: runner, tasks: tasks}
 }
 
@@ -32,7 +32,7 @@ func (this *Handler) Handle(messages ...interface{}) {
 	this.inner.Run()
 }
 
-func (this *Handler) Add(task Task) {
+func (this *Handler) Add(task RunnableTask) {
 	this.tasks = append(this.tasks, task)
 }
 

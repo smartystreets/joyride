@@ -10,21 +10,21 @@ type (
 	Dispatcher interface {
 		Dispatch(...interface{})
 	}
-	Runner interface {
-		Run(Task)
+	TaskRunner interface {
+		Run(RunnableTask)
 	}
 )
 
-type DefaultRunner struct {
+type Runner struct {
 	reader     Reader
 	writer     Writer
 	dispatcher Dispatcher
 }
 
-func NewRunner(reader Reader, writer Writer, dispatcher Dispatcher) DefaultRunner {
-	return DefaultRunner{reader: reader, writer: writer, dispatcher: dispatcher}
+func NewRunner(reader Reader, writer Writer, dispatcher Dispatcher) Runner {
+	return Runner{reader: reader, writer: writer, dispatcher: dispatcher}
 }
-func (this DefaultRunner) Run(task Task) {
+func (this Runner) Run(task RunnableTask) {
 	if task == nil {
 		return
 	}

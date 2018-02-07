@@ -1,11 +1,11 @@
 package joyride
 
 type CompositeTask struct {
-	tasks []Task
+	tasks []RunnableTask
 }
 
-func NewCompositeTask(tasks ...Task) CompositeTask {
-	var filtered []Task
+func NewCompositeTask(tasks ...RunnableTask) CompositeTask {
+	var filtered []RunnableTask
 
 	for _, task := range tasks {
 		if task != nil {
@@ -44,8 +44,8 @@ func (this CompositeTask) Messages() (messages []interface{}) {
 
 }
 
-func (this CompositeTask) Next() Task {
-	var tasks []Task
+func (this CompositeTask) Next() RunnableTask {
+	var tasks []RunnableTask
 	for _, task := range this.tasks {
 		tasks = append(tasks, task.Next())
 	}

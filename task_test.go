@@ -14,7 +14,7 @@ func TestTaskFixture(t *testing.T) {
 type TaskFixture struct {
 	*gunit.Fixture
 
-	task     *DefaultTask
+	task     *Task
 	messages []interface{}
 }
 
