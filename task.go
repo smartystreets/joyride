@@ -3,7 +3,7 @@ package joyride
 type (
 	RunnableTask interface {
 		Reads() []interface{}
-		Execute()
+		Run()
 		Writes() []interface{}
 		Messages() []interface{}
 		Next() RunnableTask
@@ -32,7 +32,7 @@ func NewTask(options ...Option) *Task {
 }
 
 func (this *Task) Reads() []interface{}    { return this.reads }
-func (this *Task) Execute()                {}
+func (this *Task) Run()                    {}
 func (this *Task) Writes() []interface{}   { return this.writes }
 func (this *Task) Messages() []interface{} { return this.messages }
 func (this *Task) Next() RunnableTask      { return this.next }
