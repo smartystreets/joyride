@@ -17,7 +17,7 @@ type RunnerFixture struct {
 	*gunit.Fixture
 	task   *FakeTask
 	io     *ExternalIO
-	runner Runner
+	runner DefaultRunner
 }
 
 func (this *RunnerFixture) Setup() {
@@ -25,7 +25,7 @@ func (this *RunnerFixture) Setup() {
 	this.io = &ExternalIO{}
 	this.runner = NewRunner(this.io, this.io, this.io)
 }
-func (this *RunnerFixture) Build(messages ...interface{}) RunnableTask {
+func (this *RunnerFixture) Build(messages ...interface{}) Task {
 	if this.task != nil {
 		this.task.Initialize(messages...)
 	}
@@ -87,7 +87,7 @@ func (this *FakeTask) Times() []time.Time {
 	return []time.Time{this.initialized, this.read, this.executed, this.written, this.dispatched, this.nextTime}
 }
 
-func (this *FakeTask) Initialize(messages ...interface{}) RunnableTask {
+func (this *FakeTask) Initialize(messages ...interface{}) Task {
 	this.initializedMessages = messages
 	this.initialized = clock.UTCNow()
 	return this
@@ -107,7 +107,7 @@ func (this *FakeTask) Messages() []interface{} {
 	this.dispatched = clock.UTCNow()
 	return this.messages
 }
-func (this *FakeTask) Next() RunnableTask {
+func (this *FakeTask) Next() Task {
 	this.nextTime = clock.UTCNow()
 	if this.next == nil {
 		return nil // Go nil conversion quirks
