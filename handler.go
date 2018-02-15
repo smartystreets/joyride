@@ -36,6 +36,10 @@ func (this *Handler) Add(task RunnableTask) {
 	this.tasks = append(this.tasks, task)
 }
 
+func (this *Handler) Tasks() []RunnableTask {
+	return this.tasks
+}
+
 func (this *Handler) Run() {
 	this.runner.Run(NewCompositeTask(this.tasks...))
 }
