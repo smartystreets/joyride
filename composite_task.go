@@ -4,13 +4,17 @@ type CompositeTask struct {
 	tasks []RunnableTask
 }
 
-func NewCompositeTask(tasks ...RunnableTask) CompositeTask {
+func NewCompositeTask(tasks ...RunnableTask) RunnableTask {
 	var filtered []RunnableTask
 
 	for _, task := range tasks {
 		if task != nil {
 			filtered = append(filtered, task)
 		}
+	}
+
+	if len(filtered) == 0 {
+		return nil
 	}
 
 	return CompositeTask{tasks: filtered}
