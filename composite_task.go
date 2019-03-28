@@ -13,10 +13,6 @@ func NewCompositeTask(tasks ...RunnableTask) RunnableTask {
 		}
 	}
 
-	if len(filtered) == 0 {
-		return nil
-	}
-
 	return CompositeTask{tasks: filtered}
 }
 
@@ -49,6 +45,10 @@ func (this CompositeTask) Messages() (messages []interface{}) {
 }
 
 func (this CompositeTask) Next() RunnableTask {
+	if len(this.tasks) == 0 {
+		return nil
+	}
+
 	var tasks []RunnableTask
 	for _, task := range this.tasks {
 		tasks = append(tasks, task.Next())
