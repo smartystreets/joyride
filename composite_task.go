@@ -49,7 +49,7 @@ func (this CompositeTask) Next() RunnableTask {
 		return nil
 	}
 
-	var tasks []RunnableTask
+	tasks := make([]RunnableTask, 0, len(this.tasks))
 	for _, task := range this.tasks {
 		tasks = append(tasks, task.Next())
 	}

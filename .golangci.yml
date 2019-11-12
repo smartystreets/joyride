@@ -30,6 +30,7 @@ service:
 
 issues:
   exclude-rules:
-    - text: "receiver name should be a reflection of its identity; don't use generic names such as \"this\" or \"self\""
+    - text: "receiver name should be a reflection of its identity"
       linters:
         - golint
+        - stylecheck

@@ -111,9 +111,9 @@ func (this *FakeTask) Next() RunnableTask {
 	this.nextTime = clock.UTCNow()
 	if this.next == nil {
 		return nil // Go nil conversion quirks
-	} else {
-		return this.next
 	}
+
+	return this.next
 }
 
 /////////////////////////////////////////////////////////////
