@@ -27,3 +27,9 @@ linters:
 
 service:
   golangci-lint-version: 1.21.x
+
+issues:
+  exclude-rules:
+    - text: "receiver name should be a reflection of its identity; don't use generic names such as \"this\" or \"self\""
+      linters:
+        - golint
