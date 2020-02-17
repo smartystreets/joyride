@@ -17,6 +17,7 @@ type (
 	Option func(*Task)
 )
 
+// TODO: Prefix each functional option below with "Prepare..."?
 func Read(items ...interface{}) Option     { return func(this *Task) { this.Read(items...) } }
 func Write(items ...interface{}) Option    { return func(this *Task) { this.Write(items...) } }
 func Dispatch(items ...interface{}) Option { return func(this *Task) { this.Dispatch(items...) } }
@@ -37,6 +38,7 @@ func (this *Task) Writes() []interface{}   { return this.writes }
 func (this *Task) Messages() []interface{} { return this.messages }
 func (this *Task) Next() RunnableTask      { return this.next }
 
+// TODO: Prefix each method below with "Prepare..."
 func (this *Task) Read(items ...interface{})     { this.reads = append(this.reads, items...) }
 func (this *Task) Write(items ...interface{})    { this.writes = append(this.writes, items...) }
 func (this *Task) Dispatch(items ...interface{}) { this.messages = append(this.messages, items...) }
