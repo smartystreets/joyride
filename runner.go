@@ -17,35 +17,14 @@ type (
 
 type RunnerOption func(*Runner)
 
-type nopDispatcher struct{}
-
-func (n nopDispatcher) Dispatch(...interface{}) {}
-
-type nopReader struct{}
-
-func (n nopReader) Read(...interface{}) {}
-
-type nopWriter struct{}
-
-func (n nopWriter) Write(...interface{}) {}
-
-
 func WithReader(reader Reader) RunnerOption {
-	return func(runner *Runner) {
-		runner.reader = reader
-	}
+	return func(this *Runner) { this.reader = reader }
 }
-
 func WithWriter(writer Writer) RunnerOption {
-	return func(runner *Runner) {
-		runner.writer = writer
-	}
+	return func(this *Runner) { this.writer = writer }
 }
-
 func WithDispatcher(dispatcher Dispatcher) RunnerOption {
-	return func(runner *Runner) {
-		runner.dispatcher = dispatcher
-	}
+	return func(this *Runner) { this.dispatcher = dispatcher }
 }
 
 type Runner struct {
@@ -56,9 +35,9 @@ type Runner struct {
 
 func NewRunner(options ...RunnerOption) Runner {
 	runner := Runner{
-		reader:     nopReader{},
-		writer:     nopWriter{},
-		dispatcher: nopDispatcher{},
+		reader:     nopIO{},
+		writer:     nopIO{},
+		dispatcher: nopIO{},
 	}
 	for _, option := range options {
 		option(&runner)
@@ -78,3 +57,9 @@ func (this Runner) Run(task RunnableTask) {
 
 	this.Run(task.Next())
 }
+
+type nopIO struct{}
+
+func (nopIO) Dispatch(...interface{}) {}
+func (nopIO) Read(...interface{})     {}
+func (nopIO) Write(...interface{})    {}
