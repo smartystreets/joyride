@@ -4,25 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"runtime/debug"
 )
-
-type TODORecord struct {
-	Description string `json:"description"`
-	Completed   bool   `json:"completed"`
-}
-
-type SelectTODOs struct {
-	Results []TODORecord
-}
-
-type InsertTODO struct {
-	Description string
-}
-
-type UpdateTODO struct {
-	Description string
-}
 
 type TODOStorage struct {
 	path string
@@ -33,59 +15,64 @@ func NewTODOStorage(path string) *TODOStorage {
 }
 
 func (this *TODOStorage) Read(queries ...interface{}) {
-	log.Println("Read: ", queries)
-	debug.PrintStack()
 	for _, rawQuery := range queries {
 		query, ok := rawQuery.(*SelectTODOs)
-		if !ok {
-			continue
-		}
-		raw, err := ioutil.ReadFile(this.path)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		err = json.Unmarshal(raw, &query.Results)
-		if err != nil {
-			log.Println(err)
+		if ok {
+			this.load(query)
 		}
 	}
 }
 
+func (this *TODOStorage) load(query *SelectTODOs) {
+	raw, err := ioutil.ReadFile(this.path)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	err = json.Unmarshal(raw, &query.Results)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (this *TODOStorage) Write(instructions ...interface{}) {
-	log.Println("Write: ", instructions)
 	for _, rawCommand := range instructions {
 		switch command := rawCommand.(type) {
 		case InsertTODO:
-			query := &SelectTODOs{}
-			this.Read(query)
-			query.Results = append(query.Results, TODORecord{Description:command.Description})
-			jsonBytes, err := json.Marshal(query.Results) //TODO refactor out duplication
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			err = ioutil.WriteFile(this.path, jsonBytes, 0644)
-			if err != nil {
-				log.Println(err)
-			}
-		//case UpdateTODO:
-		//	query := &SelectTODOs{}
-		//	this.Read(query)
-		//	for i, task := range query.Results {
-		//		if task.Description == command.Description {
-		//			query.Results[i].Completed = true
-		//		}
-		//	}
-		//	jsonBytes, err := json.Marshal(query.Results) //TODO refactor out duplication
-		//	if err != nil {
-		//		log.Println(err)
-		//		continue
-		//	}
-		//	err = ioutil.WriteFile(this.path, jsonBytes, 0644)
-		//	if err != nil {
-		//		log.Println(err)
-		//	}
+			this.insert(command)
+		case UpdateTODO:
+			this.update(command)
 		}
+	}
+}
+
+func (this *TODOStorage) update(command UpdateTODO) {
+	query := &SelectTODOs{}
+	this.Read(query)
+	for i, task := range query.Results {
+		if task.Description == command.Description {
+			query.Results[i].Completed = true
+		}
+	}
+	this.store(query.Results)
+}
+
+func (this *TODOStorage) insert(command InsertTODO) {
+	query := &SelectTODOs{}
+	this.Read(query)
+
+	query.Results = append(query.Results, TODORecord{Description: command.Description})
+	this.store(query.Results)
+}
+
+func (this *TODOStorage) store(records []TODORecord) {
+	jsonBytes, err := json.MarshalIndent(records, "", "\t")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	err = ioutil.WriteFile(this.path, jsonBytes, 0644)
+	if err != nil {
+		log.Println(err)
 	}
 }
