@@ -23,7 +23,7 @@ func main() {
 	if description != "" && !completed {
 		NewHandler(runner).Handle(AddTODO{Description: description})
 	} else if description != "" && completed {
-		NewHandler(runner).Handle(CompleteTODO{Description:description})
+		NewHandler(runner).Handle(CompleteTODO{Description: description})
 	}
 
 	instruction := &ListTODOs{}
