@@ -1,4 +1,4 @@
-package todo
+package main
 
 import "github.com/smartystreets/joyride"
 
@@ -16,8 +16,8 @@ func (this *Handler) HandleMessage(message interface{}) bool {
 	switch message := message.(type) {
 	case *ListTODOs:
 		this.Add(NewListTODOsTask(message))
-	//case AddTODO:
-	//	this.Add(NewAddTODOTask(message.ID, message.Description))
+	case AddTODO:
+		this.Add(NewAddTODOTask(message))
 	//case CompleteTODO:
 	//	this.Add(NewCompleteTODOTask(message.ID))
 	default:
@@ -28,14 +28,15 @@ func (this *Handler) HandleMessage(message interface{}) bool {
 
 type ListTODOsTask struct {
 	*joyride.Task
-	storage *ReadTODOs
+	storage *SelectTODOs
 	context *ListTODOs
 }
 
 
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	this := &ListTODOsTask{
-		storage: &ReadTODOs{},
+		Task: joyride.NewTask(),
+		storage: &SelectTODOs{},
 		context: context,
 	}
 	this.Read(this.storage)
@@ -43,11 +44,28 @@ func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 }
 
 func (this *ListTODOsTask) Run() {
-	this.context.Results = this.storage.Results
+	for _, record := range this.storage.Results {
+		this.context.Results = append(this.context.Results, TODO{
+			Description: record.Description,
+			Completed:   record.Completed,
+		})
+	}
 }
 
 type AddTODOTask struct {
 	*joyride.Task
+	description string
+}
+
+func NewAddTODOTask(context AddTODO) *AddTODOTask {
+	return &AddTODOTask{
+		Task:        joyride.NewTask(),
+		description: context.Description,
+	}
+}
+
+func (this *AddTODOTask) Run() {
+	this.Write(InsertTODO{Description:this.description})
 }
 
 type CompleteTODOTask struct {

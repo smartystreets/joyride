@@ -1,8 +1,8 @@
-package todo
+package main
 
 type TODO struct {
-	ID          uint64
 	Description string
+	Completed bool
 }
 
 type ListTODOs struct {
@@ -10,10 +10,9 @@ type ListTODOs struct {
 }
 
 type AddTODO struct {
-	ID          uint64
 	Description string
 }
 
 type CompleteTODO struct {
-	ID uint64
+	Description string
 }
