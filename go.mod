@@ -1,4 +1,4 @@
-module github.com/smartystreets/joyride
+module github.com/smartystreets/joyride/v2
 
 go 1.12
 

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/smartystreets/joyride"
+import "github.com/smartystreets/joyride/v2"
 
 type ListTODOsTask struct {
 	*joyride.Task
@@ -14,7 +14,7 @@ func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 		storage: &SelectTODOs{},
 		context: context,
 	}
-	this.Read(this.storage)
+	this.PrepareRead(this.storage)
 	return this
 }
 
@@ -42,7 +42,7 @@ func NewAddTODOTask(context AddTODO) *AddTODOTask {
 }
 
 func (this *AddTODOTask) Run() {
-	this.Write(InsertTODO{Description: this.description})
+	this.PrepareWrite(InsertTODO{Description: this.description})
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -60,5 +60,5 @@ func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
 }
 
 func (this *CompleteTODOTask) Run() {
-	this.Write(UpdateTODO{Description: this.description})
+	this.PrepareWrite(UpdateTODO{Description: this.description})
 }

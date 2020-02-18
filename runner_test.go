@@ -23,7 +23,7 @@ type RunnerFixture struct {
 func (this *RunnerFixture) Setup() {
 	this.task = NewFakeTask()
 	this.io = &ExternalIO{}
-	this.runner = NewRunner(this.io, this.io, this.io)
+	this.runner = NewRunner(WithReader(this.io), WithWriter(this.io), WithDispatcher(this.io))
 }
 func (this *RunnerFixture) Build(messages ...interface{}) RunnableTask {
 	if this.task != nil {

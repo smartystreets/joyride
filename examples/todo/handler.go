@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/smartystreets/joyride"
+	"github.com/smartystreets/joyride/v2"
 )
 
 type Handler struct {
