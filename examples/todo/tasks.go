@@ -9,13 +9,15 @@ type ListTODOsTask struct {
 }
 
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
-	this := &ListTODOsTask{
+	return &ListTODOsTask{
 		Task:    joyride.NewTask(),
 		query:   &SelectTODOs{},
 		context: context,
 	}
-	this.PrepareRead(this.query)
-	return this
+}
+
+func (this *ListTODOsTask) Read() (queries []interface{}) {
+	return append(queries, this.query)
 }
 
 func (this *ListTODOsTask) Execute() {
@@ -29,24 +31,20 @@ func (this *ListTODOsTask) Execute() {
 
 //////////////////////////////////////////////////////////////////////////
 
-type AddTODOTask struct {
-	*joyride.Task
-}
+type AddTODOTask struct{ *joyride.Task }
 
 func NewAddTODOTask(context AddTODO) *AddTODOTask {
-	return &AddTODOTask{
-		Task: joyride.NewTask(joyride.WithPreparedWrite(InsertTODO{Description: context.Description})),
-	}
+	insert := InsertTODO{Description: context.Description}
+	task := joyride.NewTask(joyride.WithPreparedWrite(insert))
+	return &AddTODOTask{Task: task}
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-type CompleteTODOTask struct {
-	*joyride.Task
-}
+type CompleteTODOTask struct{ *joyride.Task }
 
 func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
-	return &CompleteTODOTask{
-		Task: joyride.NewTask(joyride.WithPreparedWrite(UpdateTODO{Description: context.Description})),
-	}
+	insert := UpdateTODO{Description: context.Description}
+	task := joyride.NewTask(joyride.WithPreparedWrite(insert))
+	return &CompleteTODOTask{Task: task}
 }
