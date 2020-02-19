@@ -1,5 +1,11 @@
 package joyride
 
+type MessageHandler interface {
+	Handle(...interface{})
+	HandleMessage(interface{}) bool
+	Run()
+}
+
 type RunnableTask interface {
 	Reads() []interface{}
 	Execute()
@@ -8,24 +14,9 @@ type RunnableTask interface {
 	Next() RunnableTask
 }
 
-type MessageHandler interface {
-	Handle(...interface{})
-	HandleMessage(interface{}) bool
-	Run()
-}
-
-type StorageReader interface {
-	Read(...interface{})
-}
-
-type StorageWriter interface {
-	Write(...interface{})
-}
-
-type MessageDispatcher interface {
-	Dispatch(...interface{})
-}
-
-type TaskRunner interface {
-	Run(RunnableTask)
-}
+type (
+	TaskRunner        interface{ Run(RunnableTask) }
+	StorageReader     interface{ Read(...interface{}) }
+	StorageWriter     interface{ Write(...interface{}) }
+	MessageDispatcher interface{ Dispatch(...interface{}) }
+)
