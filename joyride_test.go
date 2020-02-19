@@ -29,7 +29,7 @@ func (this *JoyrideFixture) Setup() {
 	this.handler = NewExampleHandler(this.runner, this.task)
 }
 
-func (this *JoyrideFixture) TestCanHandle_NoPanic() {
+func (this *JoyrideFixture) TestMessageHandled_TaskExecuted() {
 	this.handler.Handle(42)
 
 	this.So(this.handler.handled, should.Resemble, []interface{}{42})
@@ -38,8 +38,7 @@ func (this *JoyrideFixture) TestCanHandle_NoPanic() {
 	this.So(this.io.messages, should.Resemble, this.task.messages)
 	this.So(this.task.Times(), should.BeChronological)
 }
-
-func (this *JoyrideFixture) TestCannotHandle_Panic() {
+func (this *JoyrideFixture) TestCannotHandleMessage_Panic() {
 	this.handler.canHandle = false
 
 	this.So(func() { this.handler.Handle(42) }, should.PanicWith, ErrUnknownType)
@@ -49,7 +48,6 @@ func (this *JoyrideFixture) TestCannotHandle_Panic() {
 	this.So(this.io.writes, should.BeEmpty)
 	this.So(this.io.messages, should.BeEmpty)
 }
-
 func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
 	next := NewTracingTask()
 	this.task.PrepareNextTask(next)
@@ -59,7 +57,6 @@ func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
 	this.So(next.executed.IsZero(), should.BeFalse)
 	this.So(next.Times(), should.BeChronological)
 }
-
 func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
 	next := NewTracingTask()
 	this.handler.Add(next)
