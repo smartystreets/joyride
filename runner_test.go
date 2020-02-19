@@ -96,7 +96,7 @@ func (this *FakeTask) Reads() []interface{} {
 	this.read = clock.UTCNow()
 	return this.reads
 }
-func (this *FakeTask) Run() {
+func (this *FakeTask) Execute() {
 	this.executed = clock.UTCNow()
 }
 func (this *FakeTask) Writes() []interface{} {

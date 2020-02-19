@@ -43,7 +43,7 @@ func (this *TaskFixture) TestNextStateMaintained() {
 
 func (this *TaskFixture) TestExecuteNoOperation() {
 	this.task.PrepareRead(this.messages...)
-	this.task.Run() // no op
+	this.task.Execute() // no op
 	this.task.PrepareWrite(this.messages...)
 	this.task.PrepareDispatch(this.messages...)
 
