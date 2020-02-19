@@ -44,7 +44,7 @@ func NewAddTODOTask(context AddTODO) *AddTODOTask {
 type CompleteTODOTask struct{ *joyride.Task }
 
 func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
-	insert := UpdateTODO{Description: context.Description}
-	task := joyride.NewTask(joyride.WithPreparedWrite(insert))
+	update := UpdateTODO{Description: context.Description}
+	task := joyride.NewTask(joyride.WithPreparedWrite(update))
 	return &CompleteTODOTask{Task: task}
 }
