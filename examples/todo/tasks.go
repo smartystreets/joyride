@@ -9,15 +9,13 @@ type ListTODOsTask struct {
 }
 
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
+	query := &LoadTODOsFromStorage{}
+	task := joyride.NewTask(joyride.WithPreparedRead(query))
 	return &ListTODOsTask{
-		Task:    joyride.NewTask(),
-		query:   &LoadTODOsFromStorage{},
+		Task:    task,
+		query:   query,
 		context: context,
 	}
-}
-
-func (this *ListTODOsTask) Reads() (queries []interface{}) {
-	return append(queries, this.query)
 }
 
 func (this *ListTODOsTask) Execute() {
