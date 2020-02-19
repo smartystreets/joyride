@@ -16,16 +16,16 @@ func TestJoyrideFixture(t *testing.T) {
 type JoyrideFixture struct {
 	*gunit.Fixture
 
-	task    *FakeTask
-	io      *ExternalIO
+	task    *TracingTask
+	io      *FakeExternalIO
 	handler *ExampleHandler
 	runner  Runner
 }
 
 func (this *JoyrideFixture) Setup() {
-	this.io = &ExternalIO{}
+	this.io = &FakeExternalIO{}
 	this.runner = NewRunner(WithReader(this.io), WithWriter(this.io), WithDispatcher(this.io))
-	this.task = NewFakeTask()
+	this.task = NewTracingTask()
 	this.handler = NewExampleHandler(this.runner, this.task)
 }
 
@@ -51,7 +51,7 @@ func (this *JoyrideFixture) TestCannotHandle_Panic() {
 }
 
 func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
-	next := NewFakeTask()
+	next := NewTracingTask()
 	this.task.PrepareNextTask(next)
 
 	this.handler.Handle(42)
@@ -61,7 +61,7 @@ func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
 }
 
 func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
-	next := NewFakeTask()
+	next := NewTracingTask()
 	this.handler.Add(next)
 
 	this.handler.Handle(42)
@@ -88,12 +88,14 @@ func NewExampleHandler(runner TaskRunner, task RunnableTask) *ExampleHandler {
 
 func (this *ExampleHandler) HandleMessage(message interface{}) bool {
 	this.handled = append(this.handled, message)
+	// Note: Normally, data from the message would now be provided
+	// to the tasks already registered with the handler.
 	return this.canHandle
 }
 
 //////////////////////////////////////////////////////////////
 
-type FakeTask struct {
+type TracingTask struct {
 	*Task
 
 	initialized time.Time
@@ -102,12 +104,10 @@ type FakeTask struct {
 	written     time.Time
 	dispatched  time.Time
 	nextTime    time.Time
-
-	next *FakeTask
 }
 
-func NewFakeTask() *FakeTask {
-	return &FakeTask{
+func NewTracingTask() *TracingTask {
+	return &TracingTask{
 		Task: NewTask(
 			WithPreparedRead(1, 2, 3),
 			WithPreparedWrite("4", "5", 6.0),
@@ -116,7 +116,7 @@ func NewFakeTask() *FakeTask {
 	}
 }
 
-func (this *FakeTask) Times() []time.Time {
+func (this *TracingTask) Times() []time.Time {
 	return []time.Time{
 		this.initialized,
 		this.read,
@@ -127,40 +127,40 @@ func (this *FakeTask) Times() []time.Time {
 	}
 }
 
-func (this *FakeTask) Reads() []interface{} {
+func (this *TracingTask) Reads() []interface{} {
 	this.read = clock.UTCNow()
 	return this.Task.Reads()
 }
-func (this *FakeTask) Execute() {
+func (this *TracingTask) Execute() {
 	this.executed = clock.UTCNow()
 }
-func (this *FakeTask) Writes() []interface{} {
+func (this *TracingTask) Writes() []interface{} {
 	this.written = clock.UTCNow()
 	return this.Task.Writes()
 }
-func (this *FakeTask) Messages() []interface{} {
+func (this *TracingTask) Messages() []interface{} {
 	this.dispatched = clock.UTCNow()
 	return this.Task.Messages()
 }
-func (this *FakeTask) Next() RunnableTask {
+func (this *TracingTask) Next() RunnableTask {
 	this.nextTime = clock.UTCNow()
 	return this.Task.Next()
 }
 
 /////////////////////////////////////////////////////////////
 
-type ExternalIO struct {
+type FakeExternalIO struct {
 	reads    []interface{}
 	writes   []interface{}
 	messages []interface{}
 }
 
-func (this *ExternalIO) Read(items ...interface{}) {
+func (this *FakeExternalIO) Read(items ...interface{}) {
 	this.reads = append(this.reads, items...)
 }
-func (this *ExternalIO) Write(items ...interface{}) {
+func (this *FakeExternalIO) Write(items ...interface{}) {
 	this.writes = append(this.writes, items...)
 }
-func (this *ExternalIO) Dispatch(items ...interface{}) {
+func (this *FakeExternalIO) Dispatch(items ...interface{}) {
 	this.messages = append(this.messages, items...)
 }
