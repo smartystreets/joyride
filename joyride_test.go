@@ -24,7 +24,7 @@ type JoyrideFixture struct {
 
 func (this *JoyrideFixture) Setup() {
 	this.io = &FakeExternalIO{}
-	this.runner = NewRunner(WithReader(this.io), WithWriter(this.io), WithDispatcher(this.io))
+	this.runner = NewRunner(WithStorageReader(this.io), WithStorageWriter(this.io), WithMessageDispatcher(this.io))
 	this.task = NewTracingTask()
 	this.handler = NewExampleHandler(this.runner, this.task)
 }

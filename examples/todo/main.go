@@ -19,7 +19,7 @@ func main() {
 
 	storage := NewTODOStorage("todo.json")
 
-	runner := joyride.NewRunner(joyride.WithReader(storage), joyride.WithWriter(storage))
+	runner := joyride.NewRunner(joyride.WithStorageReader(storage), joyride.WithStorageWriter(storage))
 
 	if description != "" && !completed {
 		NewHandler(runner).Handle(AddTODO{Description: description})
