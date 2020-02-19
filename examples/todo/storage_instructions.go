@@ -1,18 +1,18 @@
 package main
 
-type SelectTODOs struct {
-	Results []TODORecord
+type LoadTODOsFromStorage struct {
+	Results []StoredTODO
 }
 
-type InsertTODO struct {
+type InsertTODOIntoStorage struct {
 	Description string
 }
 
-type UpdateTODO struct {
+type UpdateTODOInStorage struct {
 	Description string
 }
 
-type TODORecord struct {
+type StoredTODO struct {
 	Description string `json:"description"`
 	Completed   bool   `json:"completed"`
 }

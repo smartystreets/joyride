@@ -16,14 +16,14 @@ func NewTODOStorage(path string) *TODOStorage {
 
 func (this *TODOStorage) Read(queries ...interface{}) {
 	for _, rawQuery := range queries {
-		query, ok := rawQuery.(*SelectTODOs)
+		query, ok := rawQuery.(*LoadTODOsFromStorage)
 		if ok {
 			this.load(query)
 		}
 	}
 }
 
-func (this *TODOStorage) load(query *SelectTODOs) {
+func (this *TODOStorage) load(query *LoadTODOsFromStorage) {
 	raw, err := ioutil.ReadFile(this.path)
 	if err != nil {
 		log.Println(err)
@@ -38,16 +38,16 @@ func (this *TODOStorage) load(query *SelectTODOs) {
 func (this *TODOStorage) Write(instructions ...interface{}) {
 	for _, rawCommand := range instructions {
 		switch command := rawCommand.(type) {
-		case InsertTODO:
+		case InsertTODOIntoStorage:
 			this.insert(command)
-		case UpdateTODO:
+		case UpdateTODOInStorage:
 			this.update(command)
 		}
 	}
 }
 
-func (this *TODOStorage) update(command UpdateTODO) {
-	query := &SelectTODOs{}
+func (this *TODOStorage) update(command UpdateTODOInStorage) {
+	query := &LoadTODOsFromStorage{}
 	this.Read(query)
 	for i, task := range query.Results {
 		if task.Description == command.Description {
@@ -57,15 +57,15 @@ func (this *TODOStorage) update(command UpdateTODO) {
 	this.store(query.Results)
 }
 
-func (this *TODOStorage) insert(command InsertTODO) {
-	query := &SelectTODOs{}
+func (this *TODOStorage) insert(command InsertTODOIntoStorage) {
+	query := &LoadTODOsFromStorage{}
 	this.Read(query)
 
-	query.Results = append(query.Results, TODORecord{Description: command.Description})
+	query.Results = append(query.Results, StoredTODO{Description: command.Description})
 	this.store(query.Results)
 }
 
-func (this *TODOStorage) store(records []TODORecord) {
+func (this *TODOStorage) store(records []StoredTODO) {
 	jsonBytes, err := json.MarshalIndent(records, "", "\t")
 	if err != nil {
 		log.Println(err)

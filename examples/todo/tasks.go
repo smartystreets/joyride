@@ -4,14 +4,14 @@ import "github.com/smartystreets/joyride/v2"
 
 type ListTODOsTask struct {
 	*joyride.Task
-	query   *SelectTODOs
+	query   *LoadTODOsFromStorage
 	context *ListTODOs
 }
 
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	return &ListTODOsTask{
 		Task:    joyride.NewTask(),
-		query:   &SelectTODOs{},
+		query:   &LoadTODOsFromStorage{},
 		context: context,
 	}
 }
@@ -34,7 +34,7 @@ func (this *ListTODOsTask) Execute() {
 type AddTODOTask struct{ *joyride.Task }
 
 func NewAddTODOTask(context AddTODO) *AddTODOTask {
-	insert := InsertTODO{Description: context.Description}
+	insert := InsertTODOIntoStorage{Description: context.Description}
 	task := joyride.NewTask(joyride.WithPreparedWrite(insert))
 	return &AddTODOTask{Task: task}
 }
@@ -44,7 +44,7 @@ func NewAddTODOTask(context AddTODO) *AddTODOTask {
 type CompleteTODOTask struct{ *joyride.Task }
 
 func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
-	update := UpdateTODO{Description: context.Description}
+	update := UpdateTODOInStorage{Description: context.Description}
 	task := joyride.NewTask(joyride.WithPreparedWrite(update))
 	return &CompleteTODOTask{Task: task}
 }
