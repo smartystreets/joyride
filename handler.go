@@ -2,12 +2,6 @@ package joyride
 
 import "errors"
 
-type MessageHandler interface {
-	Handle(...interface{})
-	HandleMessage(interface{}) bool
-	Run()
-}
-
 // This type is designed to be embedded into another type that implements the MessageHandler interface such that the
 // only method necessary for the embedding type to implement is the remaining method of HandleMessage. In essence, this
 // structure becomes, in C# terminology an, "abstract class" which needs some additional behavior in order to function
@@ -20,7 +14,11 @@ type Handler struct {
 }
 
 func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...RunnableTask) *Handler {
-	return &Handler{inner: inner, runner: runner, tasks: tasks}
+	return &Handler{
+		inner:  inner,
+		runner: runner,
+		tasks:  tasks,
+	}
 }
 
 func (this *Handler) Handle(messages ...interface{}) {
@@ -41,6 +39,8 @@ func (this *Handler) Run() {
 	this.runner.Run(NewCompositeTask(this.tasks...))
 }
 
-func (this *Handler) Tasks() []RunnableTask { return this.tasks }
+func (this *Handler) Tasks() []RunnableTask {
+	return this.tasks
+}
 
 var ErrUnknownType = errors.New("the handler does not understand the message type provided")

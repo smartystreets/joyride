@@ -1,34 +1,9 @@
 package joyride
 
-type (
-	Reader interface {
-		Read(...interface{})
-	}
-	Writer interface {
-		Write(...interface{})
-	}
-	Dispatcher interface {
-		Dispatch(...interface{})
-	}
-	TaskRunner interface {
-		Run(RunnableTask)
-	}
-)
-
-// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-type RunnerOption func(*Runner)
-
-func WithReader(r Reader) RunnerOption         { return func(this *Runner) { this.reader = r } }
-func WithWriter(w Writer) RunnerOption         { return func(this *Runner) { this.writer = w } }
-func WithDispatcher(d Dispatcher) RunnerOption { return func(this *Runner) { this.dispatcher = d } }
-
-// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 type Runner struct {
-	reader     Reader
-	writer     Writer
-	dispatcher Dispatcher
+	reader     StorageReader
+	writer     StorageWriter
+	dispatcher MessageDispatcher
 }
 
 func NewRunner(options ...RunnerOption) Runner {
@@ -42,6 +17,7 @@ func NewRunner(options ...RunnerOption) Runner {
 	}
 	return runner
 }
+
 func (this Runner) Run(task RunnableTask) {
 	if task == nil {
 		return
@@ -54,11 +30,3 @@ func (this Runner) Run(task RunnableTask) {
 
 	this.Run(task.Next())
 }
-
-// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-type nopIO struct{}
-
-func (nopIO) Dispatch(...interface{}) {}
-func (nopIO) Read(...interface{})     {}
-func (nopIO) Write(...interface{})    {}
