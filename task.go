@@ -3,7 +3,7 @@ package joyride
 type (
 	RunnableTask interface {
 		Reads() []interface{}
-		Run()
+		Execute()
 		Writes() []interface{}
 		Messages() []interface{}
 		Next() RunnableTask

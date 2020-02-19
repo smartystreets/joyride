@@ -51,7 +51,7 @@ func (this Runner) Run(task RunnableTask) {
 	}
 
 	this.reader.Read(task.Reads()...)
-	task.Run()
+	task.Execute()
 	this.writer.Write(task.Writes()...)
 	this.dispatcher.Dispatch(task.Messages()...)
 
