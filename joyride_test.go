@@ -1,0 +1,166 @@
+package joyride
+
+import (
+	"testing"
+	"time"
+
+	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
+	"github.com/smartystreets/gunit"
+)
+
+func TestJoyrideFixture(t *testing.T) {
+	gunit.Run(new(JoyrideFixture), t)
+}
+
+type JoyrideFixture struct {
+	*gunit.Fixture
+
+	task    *FakeTask
+	io      *ExternalIO
+	handler *ExampleHandler
+	runner  Runner
+}
+
+func (this *JoyrideFixture) Setup() {
+	this.io = &ExternalIO{}
+	this.runner = NewRunner(WithReader(this.io), WithWriter(this.io), WithDispatcher(this.io))
+	this.task = NewFakeTask()
+	this.handler = NewExampleHandler(this.runner, this.task)
+}
+
+func (this *JoyrideFixture) TestCanHandle_NoPanic() {
+	this.handler.Handle(42)
+
+	this.So(this.handler.handled, should.Resemble, []interface{}{42})
+	this.So(this.io.reads, should.Resemble, this.task.reads)
+	this.So(this.io.writes, should.Resemble, this.task.writes)
+	this.So(this.io.messages, should.Resemble, this.task.messages)
+	this.So(this.task.Times(), should.BeChronological)
+}
+
+func (this *JoyrideFixture) TestCannotHandle_Panic() {
+	this.handler.canHandle = false
+
+	this.So(func() { this.handler.Handle(42) }, should.PanicWith, ErrUnknownType)
+
+	this.So(this.handler.handled, should.Resemble, []interface{}{42})
+	this.So(this.io.reads, should.BeEmpty)
+	this.So(this.io.writes, should.BeEmpty)
+	this.So(this.io.messages, should.BeEmpty)
+}
+
+func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
+	next := NewFakeTask()
+	this.task.PrepareNextTask(next)
+
+	this.handler.Handle(42)
+
+	this.So(next.executed.IsZero(), should.BeFalse)
+	this.So(next.Times(), should.BeChronological)
+}
+
+func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
+	next := NewFakeTask()
+	this.handler.Add(next)
+
+	this.handler.Handle(42)
+
+	this.So(next.executed.IsZero(), should.BeFalse)
+	this.So(next.Times(), should.BeChronological)
+	this.So(this.handler.Tasks(), should.Resemble, []RunnableTask{this.task, next})
+}
+
+///////////////////////////////////////////////////////////////
+
+type ExampleHandler struct {
+	*Handler
+
+	handled   []interface{}
+	canHandle bool
+}
+
+func NewExampleHandler(runner TaskRunner, task RunnableTask) *ExampleHandler {
+	this := &ExampleHandler{canHandle: true}
+	this.Handler = NewHandler(this, runner, task)
+	return this
+}
+
+func (this *ExampleHandler) HandleMessage(message interface{}) bool {
+	this.handled = append(this.handled, message)
+	return this.canHandle
+}
+
+//////////////////////////////////////////////////////////////
+
+type FakeTask struct {
+	*Task
+
+	initialized time.Time
+	read        time.Time
+	executed    time.Time
+	written     time.Time
+	dispatched  time.Time
+	nextTime    time.Time
+
+	next *FakeTask
+}
+
+func NewFakeTask() *FakeTask {
+	return &FakeTask{
+		Task: NewTask(
+			WithPreparedRead(1, 2, 3),
+			WithPreparedWrite("4", "5", 6.0),
+			WithPreparedDispatch(7, "eight", 9, true),
+		),
+	}
+}
+
+func (this *FakeTask) Times() []time.Time {
+	return []time.Time{
+		this.initialized,
+		this.read,
+		this.executed,
+		this.written,
+		this.dispatched,
+		this.nextTime,
+	}
+}
+
+func (this *FakeTask) Reads() []interface{} {
+	this.read = clock.UTCNow()
+	return this.Task.Reads()
+}
+func (this *FakeTask) Execute() {
+	this.executed = clock.UTCNow()
+}
+func (this *FakeTask) Writes() []interface{} {
+	this.written = clock.UTCNow()
+	return this.Task.Writes()
+}
+func (this *FakeTask) Messages() []interface{} {
+	this.dispatched = clock.UTCNow()
+	return this.Task.Messages()
+}
+func (this *FakeTask) Next() RunnableTask {
+	this.nextTime = clock.UTCNow()
+	return this.Task.Next()
+}
+
+/////////////////////////////////////////////////////////////
+
+type ExternalIO struct {
+	reads    []interface{}
+	writes   []interface{}
+	messages []interface{}
+}
+
+func (this *ExternalIO) Read(items ...interface{}) {
+	this.reads = append(this.reads, items...)
+}
+func (this *ExternalIO) Write(items ...interface{}) {
+	this.writes = append(this.writes, items...)
+}
+func (this *ExternalIO) Dispatch(items ...interface{}) {
+	this.messages = append(this.messages, items...)
+}
