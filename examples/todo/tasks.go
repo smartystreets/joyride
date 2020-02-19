@@ -16,7 +16,7 @@ func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	}
 }
 
-func (this *ListTODOsTask) Read() (queries []interface{}) {
+func (this *ListTODOsTask) Reads() (queries []interface{}) {
 	return append(queries, this.query)
 }
 
