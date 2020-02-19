@@ -39,8 +39,6 @@ func (this *Handler) Run() {
 	this.runner.Run(NewCompositeTask(this.tasks...))
 }
 
-func (this *Handler) Tasks() []RunnableTask {
-	return this.tasks
-}
+func (this *Handler) Tasks() []RunnableTask { return this.tasks }
 
 var ErrUnknownType = errors.New("the handler does not understand the message type provided")
