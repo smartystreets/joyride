@@ -38,12 +38,12 @@ func NewTask(options ...TaskOption) *Task {
 }
 
 func (this *Task) Reads() []interface{}    { return this.reads }
-func (this *Task) Run()                    { /* no-op; embed the task into another struct and override */ }
+func (this *Task) Execute()                { /* no-op; embed the task into another struct and override */ }
 func (this *Task) Writes() []interface{}   { return this.writes }
 func (this *Task) Messages() []interface{} { return this.messages }
 func (this *Task) Next() RunnableTask      { return this.next }
 
-func (this *Task) PrepareRead(items ...interface{})  {
+func (this *Task) PrepareRead(items ...interface{}) {
 	this.reads = append(this.reads, items...)
 }
 func (this *Task) PrepareWrite(items ...interface{}) {

@@ -18,7 +18,7 @@ func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	return this
 }
 
-func (this *ListTODOsTask) Run() {
+func (this *ListTODOsTask) Execute() {
 	for _, record := range this.query.Results {
 		this.context.Results = append(this.context.Results, TODO{
 			Description: record.Description,

@@ -23,7 +23,7 @@ func (this CompositeTask) Reads() (reads []interface{}) {
 	return reads
 }
 
-func (this CompositeTask) Run() {
+func (this CompositeTask) Execute() {
 	for _, task := range this.tasks {
 		task.Execute()
 	}
