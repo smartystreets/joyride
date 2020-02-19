@@ -19,11 +19,9 @@ type (
 
 type RunnerOption func(*Runner)
 
-func WithReader(value Reader) RunnerOption { return func(this *Runner) { this.reader = value } }
-func WithWriter(value Writer) RunnerOption { return func(this *Runner) { this.writer = value } }
-func WithDispatcher(value Dispatcher) RunnerOption {
-	return func(this *Runner) { this.dispatcher = value }
-}
+func WithReader(r Reader) RunnerOption         { return func(this *Runner) { this.reader = r } }
+func WithWriter(w Writer) RunnerOption         { return func(this *Runner) { this.writer = w } }
+func WithDispatcher(d Dispatcher) RunnerOption { return func(this *Runner) { this.dispatcher = d } }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
