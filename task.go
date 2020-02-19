@@ -38,7 +38,7 @@ func NewTask(options ...TaskOption) *Task {
 }
 
 func (this *Task) Reads() []interface{}    { return this.reads }
-func (this *Task) Execute()                { /* no-op; embed the task into another struct and override */ }
+func (this *Task) Execute()                { /* no-op; embed the task into another struct and override this method */ }
 func (this *Task) Writes() []interface{}   { return this.writes }
 func (this *Task) Messages() []interface{} { return this.messages }
 func (this *Task) Next() RunnableTask      { return this.next }
