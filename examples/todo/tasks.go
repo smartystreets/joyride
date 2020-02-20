@@ -10,10 +10,8 @@ type ListTODOsTask struct {
 
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	storage := &LoadTODOsFromStorage{}
-	result := joyride.NewResult()
-	result.AddReads(storage)
 	return &ListTODOsTask{
-		Result:  result,
+		Result:  joyride.NewResult(storage),
 		query:   storage,
 		context: context,
 	}
@@ -37,7 +35,7 @@ type AddTODOTask struct {
 
 func NewAddTODOTask(context AddTODO) *AddTODOTask {
 	result := joyride.NewResult()
-	result.AddWrites(InsertTODOIntoStorage{Description: context.Description})
+	result.AddPendingWrites(InsertTODOIntoStorage{Description: context.Description})
 	return &AddTODOTask{Result: result}
 }
 
@@ -50,6 +48,6 @@ type CompleteTODOTask struct {
 
 func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
 	result := joyride.NewResult()
-	result.AddWrites(UpdateTODOInStorage{Description: context.Description})
+	result.AddPendingWrites(UpdateTODOInStorage{Description: context.Description})
 	return &CompleteTODOTask{Result: result}
 }

@@ -27,8 +27,8 @@ func (this CompositeTask) Execute() TaskResult {
 		if inner == nil {
 			continue
 		}
-		result.AddWrites(inner.PendingWrites()...)
-		result.AddMessages(inner.PendingMessages()...)
+		result.AddPendingWrites(inner.PendingWrites()...)
+		result.AddPendingMessages(inner.PendingMessages()...)
 		executables = append(executables, inner.SubsequentTask())
 	}
 	result.SetSubsequentTask(executables)

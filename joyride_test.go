@@ -100,9 +100,9 @@ type TracingTask struct {
 
 func NewTracingTask() *TracingTask {
 	result := NewResult()
-	result.AddReads(1, 2, 3)
-	result.AddWrites("4", "5", 6.0)
-	result.AddMessages(7, "eight", 9, true)
+	result.AddRequiredReads(1, 2, 3)
+	result.AddPendingWrites("4", "5", 6.0)
+	result.AddPendingMessages(7, "eight", 9, true)
 	return &TracingTask{
 		Result:      result,
 		initialized: time.Now().UTC(),
