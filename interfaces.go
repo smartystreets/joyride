@@ -11,10 +11,10 @@ type (
 	Executable    interface{ Execute() TaskResult }
 )
 
-type TaskResult struct {
-	PendingWrites   []interface{}
-	PendingMessages []interface{}
-	SubsequentTask  Executable
+type TaskResult interface {
+	PendingWrites() []interface{}
+	PendingMessages() []interface{}
+	SubsequentTask() Executable
 }
 
 type (

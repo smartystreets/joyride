@@ -92,22 +92,21 @@ func (this *ExampleHandler) HandleMessage(message interface{}) bool {
 //////////////////////////////////////////////////////////////
 
 type TracingTask struct {
+	*Result
 	initialized time.Time
 	read        time.Time
 	executed    time.Time
-	next        Executable
-	reads       []interface{}
-	writes      []interface{}
-	messages    []interface{}
 }
 
 func NewTracingTask() *TracingTask {
+	result := NewResult()
+	result.AddReads(1, 2, 3)
+	result.AddWrites("4", "5", 6.0)
+	result.AddMessages(7, "eight", 9, true)
 	return &TracingTask{
+		Result:      result,
 		initialized: time.Now().UTC(),
-		reads:       []interface{}{1, 2, 3},
-		writes:      []interface{}{"4", "5", 6.0},
-		messages:    []interface{}{7, "eight", 9, true},
-	} // TODO clock dependency is unnecessary
+	}
 }
 
 func (this *TracingTask) Times() []time.Time {
@@ -120,15 +119,11 @@ func (this *TracingTask) Times() []time.Time {
 
 func (this *TracingTask) RequiredReads() []interface{} {
 	this.read = time.Now().UTC()
-	return this.reads
+	return this.Result.RequiredReads()
 }
 func (this *TracingTask) Execute() TaskResult {
 	this.executed = time.Now().UTC()
-	return TaskResult{
-		PendingWrites:   this.writes,
-		PendingMessages: this.messages,
-		SubsequentTask:  this.next,
-	}
+	return this.Result.Execute()
 }
 
 /////////////////////////////////////////////////////////////

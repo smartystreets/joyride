@@ -11,11 +11,12 @@ func (this CompositeTask) RequiredReads() (reads []interface{}) {
 	return reads
 }
 
-func (this CompositeTask) Execute() (result TaskResult) {
+func (this CompositeTask) Execute() TaskResult {
 	if len(this) == 0 {
-		return result
+		return nil
 	}
 
+	result := NewResult()
 	var executables CompositeTask
 
 	for _, task := range this {
@@ -23,10 +24,14 @@ func (this CompositeTask) Execute() (result TaskResult) {
 			continue
 		}
 		inner := task.Execute()
-		result.PendingWrites = append(result.PendingWrites, inner.PendingWrites...)
-		result.PendingMessages = append(result.PendingMessages, inner.PendingMessages...)
-		executables = append(executables, inner.SubsequentTask)
+		if inner == nil {
+			continue
+		}
+		result.AddWrites(inner.PendingWrites()...)
+		result.AddMessages(inner.PendingMessages()...)
+		executables = append(executables, inner.SubsequentTask())
 	}
-	result.SubsequentTask = executables
+	result.SetSubsequentTask(executables)
+
 	return result
 }
