@@ -3,46 +3,59 @@ package main
 import "github.com/smartystreets/joyride/v2"
 
 type ListTODOsTask struct {
-	*joyride.Task
 	query   *LoadTODOsFromStorage
 	context *ListTODOs
 }
 
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
-	query := &LoadTODOsFromStorage{}
-	task := joyride.NewTask(joyride.WithPreparedRead(query))
 	return &ListTODOsTask{
-		Task:    task,
-		query:   query,
+		query:   &LoadTODOsFromStorage{},
 		context: context,
 	}
 }
 
-func (this *ListTODOsTask) Execute() {
+func (this *ListTODOsTask) RequiredReads() []interface{} {
+	return []interface{}{this.query}
+}
+
+func (this *ListTODOsTask) Execute() joyride.TaskResult {
 	for _, record := range this.query.Results {
 		this.context.Results = append(this.context.Results, TODO{
 			Description: record.Description,
 			Completed:   record.Completed,
 		})
 	}
+	return joyride.TaskResult{}
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-type AddTODOTask struct{ *joyride.Task }
+type AddTODOTask struct {
+	description string
+}
 
 func NewAddTODOTask(context AddTODO) *AddTODOTask {
-	insert := InsertTODOIntoStorage{Description: context.Description}
-	task := joyride.NewTask(joyride.WithPreparedWrite(insert))
-	return &AddTODOTask{Task: task}
+	return &AddTODOTask{description: context.Description}
+}
+
+func (this *AddTODOTask) Execute() joyride.TaskResult {
+	return joyride.TaskResult{
+		PendingWrites: []interface{}{InsertTODOIntoStorage{Description: this.description}},
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-type CompleteTODOTask struct{ *joyride.Task }
+type CompleteTODOTask struct {
+	description string
+}
 
 func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
-	update := UpdateTODOInStorage{Description: context.Description}
-	task := joyride.NewTask(joyride.WithPreparedWrite(update))
-	return &CompleteTODOTask{Task: task}
+	return &CompleteTODOTask{description: context.Description}
+}
+
+func (this *CompleteTODOTask) Execute() joyride.TaskResult {
+	return joyride.TaskResult{
+		PendingWrites: []interface{}{UpdateTODOInStorage{Description: this.description}},
+	}
 }

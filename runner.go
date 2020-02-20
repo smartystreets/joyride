@@ -18,15 +18,16 @@ func NewRunner(options ...RunnerOption) Runner {
 	return runner
 }
 
-func (this Runner) Run(task RunnableTask) {
+func (this Runner) Run(task Executable) {
 	if task == nil {
 		return
 	}
 
-	this.reader.Read(task.Reads()...)
-	task.Execute()
-	this.writer.Write(task.Writes()...)
-	this.dispatcher.Dispatch(task.Messages()...)
-
-	this.Run(task.Next())
+	if reads, ok := task.(RequiredReads); ok {
+		this.reader.Read(reads.RequiredReads()...)
+	}
+	result := task.Execute()
+	this.writer.Write(result.PendingWrites...)
+	this.dispatcher.Dispatch(result.PendingMessages...)
+	this.Run(result.SubsequentTask)
 }

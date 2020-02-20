@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
-	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
 
@@ -50,7 +49,7 @@ func (this *JoyrideFixture) TestCannotHandleMessage_Panic() {
 }
 func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
 	next := NewTracingTask()
-	this.task.PrepareNextTask(next)
+	this.task.next = next
 
 	this.handler.Handle(42)
 
@@ -65,7 +64,7 @@ func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
 
 	this.So(next.executed.IsZero(), should.BeFalse)
 	this.So(next.Times(), should.BeChronological)
-	this.So(this.handler.Tasks(), should.Resemble, []RunnableTask{this.task, next})
+	this.So(this.handler.Tasks(), should.Resemble, []Executable{this.task, next})
 }
 
 ///////////////////////////////////////////////////////////////
@@ -77,7 +76,7 @@ type ExampleHandler struct {
 	canHandle bool
 }
 
-func NewExampleHandler(runner TaskRunner, task RunnableTask) *ExampleHandler {
+func NewExampleHandler(runner TaskRunner, task Executable) *ExampleHandler {
 	this := &ExampleHandler{canHandle: true}
 	this.Handler = NewHandler(this, runner, task)
 	return this
@@ -93,24 +92,22 @@ func (this *ExampleHandler) HandleMessage(message interface{}) bool {
 //////////////////////////////////////////////////////////////
 
 type TracingTask struct {
-	*Task
-
 	initialized time.Time
 	read        time.Time
 	executed    time.Time
-	written     time.Time
-	dispatched  time.Time
-	nextTime    time.Time
+	next        Executable
+	reads       []interface{}
+	writes      []interface{}
+	messages    []interface{}
 }
 
 func NewTracingTask() *TracingTask {
 	return &TracingTask{
-		Task: NewTask(
-			WithPreparedRead(1, 2, 3),
-			WithPreparedWrite("4", "5", 6.0),
-			WithPreparedDispatch(7, "eight", 9, true),
-		),
-	}
+		initialized: time.Now().UTC(),
+		reads:       []interface{}{1, 2, 3},
+		writes:      []interface{}{"4", "5", 6.0},
+		messages:    []interface{}{7, "eight", 9, true},
+	} // TODO clock dependency is unnecessary
 }
 
 func (this *TracingTask) Times() []time.Time {
@@ -118,30 +115,20 @@ func (this *TracingTask) Times() []time.Time {
 		this.initialized,
 		this.read,
 		this.executed,
-		this.written,
-		this.dispatched,
-		this.nextTime,
 	}
 }
 
-func (this *TracingTask) Reads() []interface{} {
-	this.read = clock.UTCNow()
-	return this.Task.Reads()
+func (this *TracingTask) RequiredReads() []interface{} {
+	this.read = time.Now().UTC()
+	return this.reads
 }
-func (this *TracingTask) Execute() {
-	this.executed = clock.UTCNow()
-}
-func (this *TracingTask) Writes() []interface{} {
-	this.written = clock.UTCNow()
-	return this.Task.Writes()
-}
-func (this *TracingTask) Messages() []interface{} {
-	this.dispatched = clock.UTCNow()
-	return this.Task.Messages()
-}
-func (this *TracingTask) Next() RunnableTask {
-	this.nextTime = clock.UTCNow()
-	return this.Task.Next()
+func (this *TracingTask) Execute() TaskResult {
+	this.executed = time.Now().UTC()
+	return TaskResult{
+		PendingWrites:   this.writes,
+		PendingMessages: this.messages,
+		SubsequentTask:  this.next,
+	}
 }
 
 /////////////////////////////////////////////////////////////

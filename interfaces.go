@@ -6,16 +6,19 @@ type MessageHandler interface {
 	Run()
 }
 
-type RunnableTask interface {
-	Reads() []interface{}
-	Execute()
-	Writes() []interface{}
-	Messages() []interface{}
-	Next() RunnableTask
+type (
+	RequiredReads interface{ RequiredReads() []interface{} }
+	Executable    interface{ Execute() TaskResult }
+)
+
+type TaskResult struct {
+	PendingWrites   []interface{}
+	PendingMessages []interface{}
+	SubsequentTask  Executable
 }
 
 type (
-	TaskRunner        interface{ Run(RunnableTask) }
+	TaskRunner        interface{ Run(Executable) }
 	StorageReader     interface{ Read(...interface{}) }
 	StorageWriter     interface{ Write(...interface{}) }
 	MessageDispatcher interface{ Dispatch(...interface{}) }

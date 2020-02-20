@@ -10,10 +10,10 @@ import "errors"
 type Handler struct {
 	runner TaskRunner
 	inner  MessageHandler
-	tasks  []RunnableTask
+	tasks  []Executable
 }
 
-func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...RunnableTask) *Handler {
+func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...Executable) *Handler {
 	return &Handler{
 		inner:  inner,
 		runner: runner,
@@ -31,14 +31,14 @@ func (this *Handler) Handle(messages ...interface{}) {
 	this.inner.Run()
 }
 
-func (this *Handler) Add(task RunnableTask) {
+func (this *Handler) Add(task Executable) {
 	this.tasks = append(this.tasks, task)
 }
 
 func (this *Handler) Run() {
-	this.runner.Run(NewCompositeTask(this.tasks...))
+	this.runner.Run(CompositeTask(this.tasks))
 }
 
-func (this *Handler) Tasks() []RunnableTask { return this.tasks }
+func (this *Handler) Tasks() []Executable { return this.tasks }
 
 var ErrUnknownType = errors.New("the handler does not understand the message type provided")
