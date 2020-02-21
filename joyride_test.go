@@ -28,6 +28,15 @@ func (this *JoyrideFixture) Setup() {
 	this.handler = NewExampleHandler(this.runner, this.task)
 }
 
+func (this *JoyrideFixture) TestRunnerDropsNilExecutablesWithoutPanicking() {
+	this.So(func() { this.runner.Run(nil) }, should.NotPanic)
+}
+
+func (this *JoyrideFixture) TestCompositeTaskDroppsNilResultFromExecutableWithoutPanicking() {
+	this.handler = NewExampleHandler(this.runner, NewNilResultTask())
+	this.So(func() { this.handler.Handle(42) }, should.NotPanic)
+}
+
 func (this *JoyrideFixture) TestMessageHandled_TaskExecuted() {
 	this.handler.Handle(42)
 
@@ -124,6 +133,18 @@ func (this *TracingTask) RequiredReads() []interface{} {
 func (this *TracingTask) Execute() TaskResult {
 	this.executed = time.Now().UTC()
 	return this.Base.Execute()
+}
+
+/////////////////////////////////////////////////////////////
+
+type NilResultTask struct {*Base}
+
+func NewNilResultTask() *NilResultTask {
+	return &NilResultTask{Base: New()}
+}
+
+func (this *NilResultTask) Execute() TaskResult {
+	return nil
 }
 
 /////////////////////////////////////////////////////////////
