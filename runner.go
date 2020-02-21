@@ -1,38 +1,36 @@
 package joyride
 
-type (
-	Reader interface {
-		Read(...interface{})
-	}
-	Writer interface {
-		Write(...interface{})
-	}
-	Dispatcher interface {
-		Dispatch(...interface{})
-	}
-	TaskRunner interface {
-		Run(RunnableTask)
-	}
-)
-
 type Runner struct {
-	reader     Reader
-	writer     Writer
-	dispatcher Dispatcher
+	reader     StorageReader
+	writer     StorageWriter
+	dispatcher MessageDispatcher
 }
 
-func NewRunner(reader Reader, writer Writer, dispatcher Dispatcher) Runner {
-	return Runner{reader: reader, writer: writer, dispatcher: dispatcher}
+func NewRunner(options ...RunnerOption) Runner {
+	runner := Runner{
+		reader:     nopIO{},
+		writer:     nopIO{},
+		dispatcher: nopIO{},
+	}
+	for _, option := range options {
+		option(&runner)
+	}
+	return runner
 }
-func (this Runner) Run(task RunnableTask) {
+
+func (this Runner) Run(task Executable) {
 	if task == nil {
 		return
 	}
 
-	this.reader.Read(task.Reads()...)
-	task.Run()
-	this.writer.Write(task.Writes()...)
-	this.dispatcher.Dispatch(task.Messages()...)
-
-	this.Run(task.Next())
+	if reads, ok := task.(RequiredReads); ok {
+		this.reader.Read(reads.RequiredReads()...)
+	}
+	result := task.Execute()
+	if result == nil {
+		return
+	}
+	this.writer.Write(result.PendingWrites()...)
+	this.dispatcher.Dispatch(result.PendingMessages()...)
+	this.Run(result.SubsequentTask())
 }

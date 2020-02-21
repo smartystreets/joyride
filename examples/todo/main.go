@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/smartystreets/joyride"
+	"github.com/smartystreets/joyride/v2"
 )
 
 func main() {
@@ -18,7 +18,8 @@ func main() {
 	flag.Parse()
 
 	storage := NewTODOStorage("todo.json")
-	runner := joyride.NewRunner(storage, storage, NopDispatcher{})
+
+	runner := joyride.NewRunner(joyride.WithStorageReader(storage), joyride.WithStorageWriter(storage))
 
 	if description != "" && !completed {
 		NewHandler(runner).Handle(AddTODO{Description: description})
@@ -37,7 +38,3 @@ var completion = map[bool]string{
 	false: " ",
 	true:  "x",
 }
-
-type NopDispatcher struct{}
-
-func (n NopDispatcher) Dispatch(...interface{}) {}

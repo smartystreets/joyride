@@ -2,7 +2,7 @@ package main
 
 type TODO struct {
 	Description string
-	Completed bool
+	Completed   bool
 }
 
 type ListTODOs struct {
