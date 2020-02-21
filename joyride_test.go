@@ -92,19 +92,19 @@ func (this *ExampleHandler) HandleMessage(message interface{}) bool {
 //////////////////////////////////////////////////////////////
 
 type TracingTask struct {
-	*Result
+	*Base
 	initialized time.Time
 	read        time.Time
 	executed    time.Time
 }
 
 func NewTracingTask() *TracingTask {
-	result := NewResult()
-	result.AddRequiredReads(1, 2, 3)
-	result.AddPendingWrites("4", "5", 6.0)
-	result.AddPendingMessages(7, "eight", 9, true)
+	base := New()
+	base.AddRequiredReads(1, 2, 3)
+	base.AddPendingWrites("4", "5", 6.0)
+	base.AddPendingMessages(7, "eight", 9, true)
 	return &TracingTask{
-		Result:      result,
+		Base:        base,
 		initialized: time.Now().UTC(),
 	}
 }
@@ -119,11 +119,11 @@ func (this *TracingTask) Times() []time.Time {
 
 func (this *TracingTask) RequiredReads() []interface{} {
 	this.read = time.Now().UTC()
-	return this.Result.RequiredReads()
+	return this.Base.RequiredReads()
 }
 func (this *TracingTask) Execute() TaskResult {
 	this.executed = time.Now().UTC()
-	return this.Result.Execute()
+	return this.Base.Execute()
 }
 
 /////////////////////////////////////////////////////////////

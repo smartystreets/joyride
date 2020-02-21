@@ -3,7 +3,7 @@ package main
 import "github.com/smartystreets/joyride/v2"
 
 type ListTODOsTask struct {
-	*joyride.Result
+	*joyride.Base
 	query   *LoadTODOsFromStorage
 	context *ListTODOs
 }
@@ -11,7 +11,7 @@ type ListTODOsTask struct {
 func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	storage := &LoadTODOsFromStorage{}
 	return &ListTODOsTask{
-		Result:  joyride.NewResult(storage),
+		Base:    joyride.New(storage),
 		query:   storage,
 		context: context,
 	}
@@ -30,24 +30,25 @@ func (this *ListTODOsTask) Execute() joyride.TaskResult {
 //////////////////////////////////////////////////////////////////////////
 
 type AddTODOTask struct {
-	*joyride.Result
+	*joyride.Base
 }
 
 func NewAddTODOTask(context AddTODO) *AddTODOTask {
-	result := joyride.NewResult()
-	result.AddPendingWrites(InsertTODOIntoStorage{Description: context.Description})
-	return &AddTODOTask{Result: result}
+	operation := InsertTODOIntoStorage{Description: context.Description}
+	base := joyride.New()
+	base.AddPendingWrites(operation)
+	return &AddTODOTask{Base: base}
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 type CompleteTODOTask struct {
-	*joyride.Result
+	*joyride.Base
 	description string
 }
 
 func NewCompleteTODOTask(context CompleteTODO) *CompleteTODOTask {
-	result := joyride.NewResult()
+	result := joyride.New()
 	result.AddPendingWrites(UpdateTODOInStorage{Description: context.Description})
-	return &CompleteTODOTask{Result: result}
+	return &CompleteTODOTask{Base: result}
 }

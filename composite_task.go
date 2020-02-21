@@ -16,7 +16,7 @@ func (this CompositeTask) Execute() TaskResult {
 		return nil
 	}
 
-	result := NewResult()
+	result := New()
 	var executables CompositeTask
 
 	for _, task := range this {
