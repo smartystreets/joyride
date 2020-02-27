@@ -37,6 +37,7 @@ func (this *Handler) Add(task Executable) {
 
 func (this *Handler) Run() {
 	this.runner.Run(CompositeTask(this.tasks)) // TODO: Clear tasks when Run is complete (bug)
+	this.tasks = nil
 }
 
 func (this *Handler) Tasks() []Executable { return this.tasks }

@@ -32,9 +32,16 @@ func (this *JoyrideFixture) TestRunnerDropsNilExecutablesWithoutPanicking() {
 	this.So(func() { this.runner.Run(nil) }, should.NotPanic)
 }
 
-func (this *JoyrideFixture) TestCompositeTaskDroppsNilResultFromExecutableWithoutPanicking() {
+func (this *JoyrideFixture) TestCompositeTaskDropsNilResultFromExecutableWithoutPanicking() {
 	this.handler = NewExampleHandler(this.runner, NewNilResultTask())
 	this.So(func() { this.handler.Handle(42) }, should.NotPanic)
+}
+
+func (this *JoyrideFixture) TestHandlerClearsTasksAfterExecuted() {
+	this.handler.Handle(42)
+	this.handler.Handle(42)
+
+	this.So(this.task.executed, should.HaveLength, 1)
 }
 
 func (this *JoyrideFixture) TestMessageHandled_TaskExecuted() {
@@ -62,7 +69,9 @@ func (this *JoyrideFixture) TestChainedTasksAreExecuted() {
 
 	this.handler.Handle(42)
 
-	this.So(next.executed.IsZero(), should.BeFalse)
+	if this.So(next.executed, should.HaveLength, 1) {
+		this.So(next.executed[0].IsZero(), should.BeFalse)
+	}
 	this.So(next.Times(), should.BeChronological)
 }
 func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
@@ -71,9 +80,10 @@ func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
 
 	this.handler.Handle(42)
 
-	this.So(next.executed.IsZero(), should.BeFalse)
+	if this.So(next.executed, should.HaveLength, 1) {
+		this.So(next.executed[0].IsZero(), should.BeFalse)
+	}
 	this.So(next.Times(), should.BeChronological)
-	this.So(this.handler.Tasks(), should.Resemble, []Executable{this.task, next})
 }
 
 ///////////////////////////////////////////////////////////////
@@ -104,7 +114,7 @@ type TracingTask struct {
 	*Base
 	initialized time.Time
 	read        time.Time
-	executed    time.Time
+	executed    []time.Time
 }
 
 func NewTracingTask() *TracingTask {
@@ -119,11 +129,10 @@ func NewTracingTask() *TracingTask {
 }
 
 func (this *TracingTask) Times() []time.Time {
-	return []time.Time{
+	return append([]time.Time{
 		this.initialized,
 		this.read,
-		this.executed,
-	}
+	}, this.executed...)
 }
 
 func (this *TracingTask) RequiredReads() []interface{} {
@@ -131,7 +140,7 @@ func (this *TracingTask) RequiredReads() []interface{} {
 	return this.Base.RequiredReads()
 }
 func (this *TracingTask) Execute() TaskResult {
-	this.executed = time.Now().UTC()
+	this.executed = append(this.executed, time.Now().UTC())
 	return this.Base.Execute()
 }
 
