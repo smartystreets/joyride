@@ -1,6 +1,9 @@
 package joyride
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 // This type is designed to be embedded into another type that implements the MessageHandler interface such that the
 // only method necessary for the embedding type to implement is the remaining method of HandleMessage. In essence, this
@@ -21,22 +24,22 @@ func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...Executable) *H
 	}
 }
 
-func (this *Handler) Handle(messages ...interface{}) {
+func (this *Handler) Handle(ctx context.Context, messages ...interface{}) {
 	for _, message := range messages {
-		if !this.inner.HandleMessage(message) {
+		if !this.inner.HandleMessage(ctx, message) {
 			panic(ErrUnknownType)
 		}
 	}
 
-	this.inner.Run()
+	this.inner.Run(ctx)
 }
 
 func (this *Handler) Add(task Executable) {
 	this.tasks = append(this.tasks, task)
 }
 
-func (this *Handler) Run() {
-	this.runner.Run(CompositeTask(this.tasks))
+func (this *Handler) Run(ctx context.Context) {
+	this.runner.Run(ctx, CompositeTask(this.tasks))
 	this.tasks = nil
 }
 

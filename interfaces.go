@@ -1,14 +1,18 @@
 package joyride
 
+import "context"
+
 type MessageHandler interface {
-	Handle(...interface{})
-	HandleMessage(interface{}) bool
-	Run()
+	Handle(ctx context.Context, messages ...interface{})
+	HandleMessage(ctx context.Context, message interface{}) bool
+	Run(ctx context.Context)
 }
 
 type (
 	RequiredReads interface{ RequiredReads() []interface{} }
-	Executable    interface{ Execute() TaskResult }
+	Executable    interface {
+		Execute(ctx context.Context) TaskResult
+	}
 )
 
 type TaskResult interface {
@@ -18,8 +22,16 @@ type TaskResult interface {
 }
 
 type (
-	TaskRunner        interface{ Run(Executable) }
-	StorageReader     interface{ Read(...interface{}) }
-	StorageWriter     interface{ Write(...interface{}) }
-	MessageDispatcher interface{ Dispatch(...interface{}) }
+	TaskRunner interface {
+		Run(ctx context.Context, task Executable)
+	}
+	StorageReader interface {
+		Read(ctx context.Context, reads ...interface{})
+	}
+	StorageWriter interface {
+		Write(ctx context.Context, writes ...interface{})
+	}
+	MessageDispatcher interface {
+		Dispatch(ctx context.Context, messages ...interface{})
+	}
 )

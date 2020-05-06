@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -14,7 +15,7 @@ func NewTODOStorage(path string) *TODOStorage {
 	return &TODOStorage{path: path}
 }
 
-func (this *TODOStorage) Read(queries ...interface{}) {
+func (this *TODOStorage) Read(_ context.Context, queries ...interface{}) {
 	for _, rawQuery := range queries {
 		query, ok := rawQuery.(*LoadTODOsFromStorage)
 		if ok {
@@ -35,20 +36,20 @@ func (this *TODOStorage) load(query *LoadTODOsFromStorage) {
 	}
 }
 
-func (this *TODOStorage) Write(instructions ...interface{}) {
+func (this *TODOStorage) Write(ctx context.Context, instructions ...interface{}) {
 	for _, rawCommand := range instructions {
 		switch command := rawCommand.(type) {
 		case InsertTODOIntoStorage:
-			this.insert(command)
+			this.insert(ctx, command)
 		case UpdateTODOInStorage:
-			this.update(command)
+			this.update(ctx, command)
 		}
 	}
 }
 
-func (this *TODOStorage) update(command UpdateTODOInStorage) {
+func (this *TODOStorage) update(ctx context.Context, command UpdateTODOInStorage) {
 	query := &LoadTODOsFromStorage{}
-	this.Read(query)
+	this.Read(ctx, query)
 	for i, task := range query.Results {
 		if task.Description == command.Description {
 			query.Results[i].Completed = true
@@ -57,9 +58,9 @@ func (this *TODOStorage) update(command UpdateTODOInStorage) {
 	this.store(query.Results)
 }
 
-func (this *TODOStorage) insert(command InsertTODOIntoStorage) {
+func (this *TODOStorage) insert(ctx context.Context, command InsertTODOIntoStorage) {
 	query := &LoadTODOsFromStorage{}
-	this.Read(query)
+	this.Read(ctx, query)
 
 	query.Results = append(query.Results, StoredTODO{Description: command.Description})
 	this.store(query.Results)
