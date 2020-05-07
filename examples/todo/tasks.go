@@ -1,6 +1,10 @@
 package main
 
-import "github.com/smartystreets/joyride/v2"
+import (
+	"context"
+
+	"github.com/smartystreets/joyride/v3"
+)
 
 type ListTODOsTask struct {
 	*joyride.Base
@@ -17,7 +21,7 @@ func NewListTODOsTask(context *ListTODOs) *ListTODOsTask {
 	}
 }
 
-func (this *ListTODOsTask) Execute() joyride.TaskResult {
+func (this *ListTODOsTask) Execute(ctx context.Context) joyride.TaskResult {
 	for _, record := range this.query.Results {
 		this.context.Results = append(this.context.Results, TODO{
 			Description: record.Description,

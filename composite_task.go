@@ -1,5 +1,7 @@
 package joyride
 
+import "context"
+
 type CompositeTask []Executable
 
 func (this CompositeTask) RequiredReads() (reads []interface{}) {
@@ -11,7 +13,7 @@ func (this CompositeTask) RequiredReads() (reads []interface{}) {
 	return reads
 }
 
-func (this CompositeTask) Execute() TaskResult {
+func (this CompositeTask) Execute(ctx context.Context) TaskResult {
 	if len(this) == 0 {
 		return nil
 	}
@@ -23,7 +25,7 @@ func (this CompositeTask) Execute() TaskResult {
 		if task == nil {
 			continue
 		}
-		inner := task.Execute()
+		inner := task.Execute(ctx)
 		if inner == nil {
 			continue
 		}

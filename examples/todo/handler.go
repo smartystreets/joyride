@@ -1,7 +1,9 @@
 package main
 
 import (
-	"github.com/smartystreets/joyride/v2"
+	"context"
+
+	"github.com/smartystreets/joyride/v3"
 )
 
 type Handler struct {
@@ -14,7 +16,7 @@ func NewHandler(runner joyride.TaskRunner) *Handler {
 	return this
 }
 
-func (this *Handler) HandleMessage(message interface{}) bool {
+func (this *Handler) HandleMessage(ctx context.Context, message interface{}) bool {
 	switch message := message.(type) {
 	case *ListTODOs:
 		this.Add(NewListTODOsTask(message))
