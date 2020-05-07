@@ -9,11 +9,7 @@ type Runner struct {
 }
 
 func NewRunner(options ...RunnerOption) Runner {
-	runner := Runner{
-		reader:     nopIO{},
-		writer:     nopIO{},
-		dispatcher: nopIO{},
-	}
+	runner := Runner{reader: nop{}, writer: nop{}, dispatcher: nop{}}
 	for _, option := range options {
 		option(&runner)
 	}
@@ -36,3 +32,9 @@ func (this Runner) Run(ctx context.Context, task Executable) {
 	this.dispatcher.Dispatch(ctx, result.PendingMessages()...)
 	this.Run(ctx, result.SubsequentTask())
 }
+
+type nop struct{}
+
+func (nop) Dispatch(_ context.Context, _ ...interface{}) {}
+func (nop) Read(_ context.Context, _ ...interface{})     {}
+func (nop) Write(_ context.Context, _ ...interface{})    {}
