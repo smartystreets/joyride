@@ -3,6 +3,8 @@ package joyride
 import (
 	"context"
 	"errors"
+	"fmt"
+	"reflect"
 )
 
 // This type is designed to be embedded into another type that implements the MessageHandler interface such that the
@@ -27,7 +29,7 @@ func NewHandler(inner MessageHandler, runner TaskRunner, tasks ...Executable) *H
 func (this *Handler) Handle(ctx context.Context, messages ...interface{}) {
 	for _, message := range messages {
 		if !this.inner.HandleMessage(ctx, message) {
-			panic(ErrUnknownType)
+			panic(fmt.Errorf("%w: [%s]", ErrUnknownType, reflect.TypeOf(message)))
 		}
 	}
 

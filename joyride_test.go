@@ -64,7 +64,7 @@ func (this *JoyrideFixture) TestMessageHandled_TaskExecuted() {
 func (this *JoyrideFixture) TestCannotHandleMessage_Panic() {
 	this.handler.canHandle = false
 
-	this.So(func() { this.handler.Handle(this.ctx, 42) }, should.PanicWith, ErrUnknownType)
+	this.So(func() { this.handler.Handle(this.ctx, 42) }, should.Panic)
 
 	this.So(this.handler.handled, should.Resemble, []interface{}{42})
 	this.So(this.io.reads, should.BeEmpty)
