@@ -51,6 +51,9 @@ func (this *JoyrideFixture) TestMessageHandled_TaskExecuted() {
 	this.handler.Handle(this.ctx, 42)
 
 	this.So(this.handler.handled, should.Resemble, []interface{}{42})
+	this.So(this.io.readCalls, should.Equal, 1)
+	this.So(this.io.writeCalls, should.Equal, 1)
+	this.So(this.io.dispatchCalls, should.Equal, 1)
 	this.So(this.io.reads, should.Resemble, this.task.reads)
 	this.So(this.io.writes, should.Resemble, this.task.writes)
 	this.So(this.io.messages, should.Resemble, this.task.messages)
@@ -178,17 +181,24 @@ type FakeExternalIO struct {
 	reads    []interface{}
 	writes   []interface{}
 	messages []interface{}
+
+	readCalls     int
+	writeCalls    int
+	dispatchCalls int
 }
 
 func (this *FakeExternalIO) Read(ctx context.Context, items ...interface{}) {
+	this.readCalls++
 	this.readContext = ctx
 	this.reads = append(this.reads, items...)
 }
 func (this *FakeExternalIO) Write(ctx context.Context, items ...interface{}) {
+	this.writeCalls++
 	this.writeContext = ctx
 	this.writes = append(this.writes, items...)
 }
 func (this *FakeExternalIO) Dispatch(ctx context.Context, items ...interface{}) {
+	this.dispatchCalls++
 	this.dispatchContext = ctx
 	this.messages = append(this.messages, items...)
 }

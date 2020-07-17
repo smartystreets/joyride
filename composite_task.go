@@ -31,9 +31,14 @@ func (this CompositeTask) Execute(ctx context.Context) TaskResult {
 		}
 		result.AddPendingWrites(inner.PendingWrites()...)
 		result.AddPendingMessages(inner.PendingMessages()...)
-		executables = append(executables, inner.SubsequentTask())
+		subsequentTask := inner.SubsequentTask()
+		if subsequentTask != nil {
+			executables = append(executables, subsequentTask)
+		}
 	}
-	result.SetSubsequentTask(executables)
+	if len(executables) > 0 {
+		result.SetSubsequentTask(executables)
+	}
 
 	return result
 }
