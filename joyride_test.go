@@ -97,6 +97,17 @@ func (this *JoyrideFixture) TestAddedTasksAreExecuted() {
 	this.So(next.Times(), should.BeChronological)
 }
 
+func (this *JoyrideFixture) TestIOAvoidedWhenThereIsNoWorkToBeDone() {
+	task := NewZeroIOTask()
+	this.handler = NewExampleHandler(this.runner, task)
+	this.handler.Handle(this.ctx, 42)
+
+	this.So(this.io.readCalls, should.Equal, 0)
+	this.So(this.io.writeCalls, should.Equal, 0)
+	this.So(this.io.dispatchCalls, should.Equal, 0)
+}
+
+
 ///////////////////////////////////////////////////////////////
 
 type ExampleHandler struct {
@@ -169,6 +180,18 @@ func NewNilResultTask() *NilResultTask {
 
 func (this *NilResultTask) Execute(_ context.Context) TaskResult {
 	return nil
+}
+
+/////////////////////////////////////////////////////////////
+
+type ZeroIOTask struct{ *Base }
+
+func NewZeroIOTask() *ZeroIOTask {
+	return &ZeroIOTask{Base: New()}
+}
+
+func (this *ZeroIOTask) Execute(_ context.Context) TaskResult {
+	return this
 }
 
 /////////////////////////////////////////////////////////////

@@ -21,16 +21,42 @@ func (this Runner) Run(ctx context.Context, task Executable) {
 		return
 	}
 
-	if reads, ok := task.(RequiredReads); ok {
-		this.reader.Read(ctx, reads.RequiredReads()...)
-	}
+	this.performRequiredReads(ctx, task)
+
 	result := task.Execute(ctx)
 	if result == nil {
 		return
 	}
-	this.writer.Write(ctx, result.PendingWrites()...)
-	this.dispatcher.Dispatch(ctx, result.PendingMessages()...)
+
+	this.performWrites(ctx, result)
+	this.performDispatches(ctx, result)
+
 	this.Run(ctx, result.SubsequentTask())
+}
+
+func (this Runner) performRequiredReads(ctx context.Context, task Executable) {
+	reader, ok := task.(RequiredReads)
+	if !ok {
+		return
+	}
+	reads := reader.RequiredReads()
+	if len(reads) > 0 {
+		this.reader.Read(ctx, reads...)
+	}
+}
+
+func (this Runner) performWrites(ctx context.Context, result TaskResult) {
+	writes := result.PendingWrites()
+	if len(writes) > 0 {
+		this.writer.Write(ctx, writes...)
+	}
+}
+
+func (this Runner) performDispatches(ctx context.Context, result TaskResult) {
+	messages := result.PendingMessages()
+	if len(messages) > 0 {
+		this.dispatcher.Dispatch(ctx, messages...)
+	}
 }
 
 type nop struct{}
