@@ -107,7 +107,6 @@ func (this *JoyrideFixture) TestIOAvoidedWhenThereIsNoWorkToBeDone() {
 	this.So(this.io.dispatchCalls, should.Equal, 0)
 }
 
-
 ///////////////////////////////////////////////////////////////
 
 type ExampleHandler struct {
