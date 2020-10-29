@@ -1,14 +1,19 @@
 package joyride
 
-import "context"
+import (
+	"context"
+	"reflect"
+)
 
 type CompositeTask []Executable
 
 func (this CompositeTask) RequiredReads() (reads []interface{}) {
 	for _, task := range this {
-		if reader, ok := task.(RequiredReads); ok {
-			reads = append(reads, reader.RequiredReads()...)
+		reader, ok := task.(RequiredReads)
+		if !ok || isNil(reader) {
+			continue
 		}
+		reads = append(reads, reader.RequiredReads()...)
 	}
 	return reads
 }
@@ -22,13 +27,15 @@ func (this CompositeTask) Execute(ctx context.Context) TaskResult {
 	var executables CompositeTask
 
 	for _, task := range this {
-		if task == nil {
+		if task == nil || isNil(task) {
 			continue
 		}
+
 		inner := task.Execute(ctx)
-		if inner == nil {
+		if inner == nil || isNil(inner) {
 			continue
 		}
+
 		result.AddPendingWrites(inner.PendingWrites()...)
 		result.AddPendingMessages(inner.PendingMessages()...)
 		subsequentTask := inner.SubsequentTask()
@@ -41,4 +48,13 @@ func (this CompositeTask) Execute(ctx context.Context) TaskResult {
 	}
 
 	return result
+}
+
+func isNil(v interface{}) bool {
+	switch reflect.TypeOf(v).Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+		return reflect.ValueOf(v).IsNil()
+	default:
+		return v == nil
+	}
 }

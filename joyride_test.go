@@ -107,6 +107,12 @@ func (this *JoyrideFixture) TestIOAvoidedWhenThereIsNoWorkToBeDone() {
 	this.So(this.io.dispatchCalls, should.Equal, 0)
 }
 
+func (this *JoyrideFixture) TestNilTask_NoPanic() {
+	this.handler.Add(NewNilTask())
+	this.So(func() {this.handler.Handle(this.ctx, 42)}, should.NotPanic)
+	this.handler.Handle(this.ctx, 42)
+}
+
 ///////////////////////////////////////////////////////////////
 
 type ExampleHandler struct {
@@ -223,4 +229,12 @@ func (this *FakeExternalIO) Dispatch(ctx context.Context, items ...interface{}) 
 	this.dispatchCalls++
 	this.dispatchContext = ctx
 	this.messages = append(this.messages, items...)
+}
+
+/////////////////////////////////////////////////////////////
+
+type NilTask struct { *Base }
+
+func NewNilTask() *NilTask {
+	return nil
 }
