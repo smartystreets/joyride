@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-// This type is designed to be embedded into another type that implements the MessageHandler interface such that the
+// Handler is designed to be embedded into another type that implements the MessageHandler interface such that the
 // only method necessary for the embedding type to implement is the remaining method of HandleMessage. In essence, this
 // structure becomes, in C# terminology an, "abstract class" which needs some additional behavior in order to function
 // properly. In addition, because this struct is embedded, the existing methods of Handle (and more especially) the
